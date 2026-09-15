@@ -7,14 +7,22 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private float _vertWallCheckDistance = 1f;
     [SerializeField]private float _horWallCheckDistance = 1f;
     //probably move this away from being layers later but idk it works for walls
+    [SerializeField] private float _dashDistance = 5f;
     [SerializeField] private LayerMask _wallLayer;
     [SerializeField] private float _jumpForce = 1f;
     private bool _isGrounded = true;
     private Vector2 move;
     private Rigidbody2D _playerRB;
-
-    //probably a better way to do this with like a for loop or something but idk I'm lazy rn
+    
+    //probably a better way to do this with like a for loop or coroutine but idk I'm lazy
+    //yeah rereading this half this shit needs to be on coroutines instead of if statements I just didn't want to impliment them
     private float _jumpCooldown = 0f;
+
+
+    //dash variables
+    private float _dashCooldown = 0f;
+    private float _dashAirTimeLeft = 0f;
+    [SerializeField] private float _dashAirTimeSet = 1f;
     private void Awake()
     {
         _playerRB = GetComponent<Rigidbody2D>();
@@ -32,6 +40,30 @@ public class PlayerMovementScript : MonoBehaviour
         }
 
     }
+    public void OnDash(InputAction.CallbackContext context)
+
+
+    {
+        if (_dashCooldown <= 0f)
+        {
+            if (move.x < 0f)
+            {
+                _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
+                _dashCooldown = 1f;
+                _playerRB.gravityScale = 0f;
+            }
+            else if (move.x > 0f)
+            {
+                _playerRB.AddForce(Vector2.right * _dashDistance, ForceMode2D.Impulse);
+                _dashCooldown = 1f;
+                Debug.Log("dashtried");
+                _playerRB.gravityScale = 0f;
+            }
+        }
+       
+
+
+    }
     public void OnJump(InputAction.CallbackContext context)
     {
         if (_isGrounded == true && (_jumpCooldown <= 0))
@@ -45,6 +77,8 @@ public class PlayerMovementScript : MonoBehaviour
     }
     private void Update()
     {
+
+        //add raycasts for bottom left, bottomright, etc, etc, in order to stop jittering on corners
 
         if (move.x > 0)
         {
@@ -95,8 +129,14 @@ public class PlayerMovementScript : MonoBehaviour
 
             }
         }
-        //bad way to do a cooldown but this is here because you could jump twice before you could get off the ground so you'll want to replace it
+        if (_dashAirTimeLeft <= 0)
+        {
+            _playerRB.gravityScale = 1f;
+        }
+        //bad way to do a cooldown but this is here because you could jump twice before you could get off the ground so you'll want to replace it with a coroutine probably
         _jumpCooldown -= Time.deltaTime;
+        _dashCooldown -= Time.deltaTime;
+          
         }
     //some code from my old game
 }
