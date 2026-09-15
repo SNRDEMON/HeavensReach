@@ -4,7 +4,8 @@ using UnityEngine.InputSystem;
 public class PlayerMovementScript : MonoBehaviour
 {
     private float _speed = 5f;
-    [SerializeField]private float _wallCheckDistance = 1f;
+    [SerializeField] private float _vertWallCheckDistance = 1f;
+    [SerializeField]private float _horWallCheckDistance = 1f;
     //probably move this away from being layers later but idk it works for walls
     [SerializeField] private LayerMask _wallLayer;
     [SerializeField] private float _jumpForce = 1f;
@@ -33,11 +34,12 @@ public class PlayerMovementScript : MonoBehaviour
     }
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (_isGrounded && (_jumpCooldown <= 0))
+        if (_isGrounded == true && (_jumpCooldown <= 0))
         {
             _playerRB.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
-            _isGrounded=false;
             _jumpCooldown = 1f;
+            _isGrounded =false;
+
         }
 
     }
@@ -46,7 +48,7 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (move.x > 0)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, _wallCheckDistance, _wallLayer);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, _horWallCheckDistance, _wallLayer);
             if (hit.collider != null)
             {
                 move.x = 0;
@@ -55,7 +57,7 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (move.x < 0)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, _wallCheckDistance, _wallLayer);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, _horWallCheckDistance, _wallLayer);
             if (hit.collider != null)
             {
                 move.x = 0;
@@ -64,17 +66,17 @@ public class PlayerMovementScript : MonoBehaviour
         
         if (move.y > 0)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, _wallCheckDistance, _wallLayer);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, _vertWallCheckDistance, _wallLayer);
             if (hit.collider != null)
             {
                 move.y = 0;
-                _isGrounded = true;
+
 
             }
         }
         if (move.y < 0)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, _wallCheckDistance, _wallLayer);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, _vertWallCheckDistance, _wallLayer);
             if (hit.collider != null)
             {
                 move.y = 0;
@@ -84,9 +86,9 @@ public class PlayerMovementScript : MonoBehaviour
         transform.position += direction * _speed * Time.deltaTime;
 
         //this feels bad to check this every frame but idk, all the stuff above is raycasting to check for walls
-        if (_isGrounded == false)
+        if (_isGrounded == false && (_jumpCooldown <= 0))
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, _wallCheckDistance, _wallLayer);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, _vertWallCheckDistance, _wallLayer);
             if (hit.collider != null)
             {
                 _isGrounded = true;
