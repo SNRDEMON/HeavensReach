@@ -478,7 +478,7 @@ MonoBehaviour:
   _wallLayer:
     serializedVersion: 2
     m_Bits: 64
-  _jumpForce: 19
+  _jumpForce: 20
 --- !u!1 &489102698
 GameObject:
   m_ObjectHideFlags: 0
