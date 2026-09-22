@@ -4,13 +4,20 @@ using UnityEngine.InputSystem;
 public class PlayerMovementScript : MonoBehaviour
 {
     private float _speed = 5f;
+
+
+    [Header("Wall checking Stuff")]
     [SerializeField] private float _vertWallCheckDistance = 1f;
     [SerializeField]private float _horWallCheckDistance = 1f;
+
+
     //probably move this away from being layers later but idk it works for walls
     [SerializeField] private float _dashDistance = 5f;
     [SerializeField] private LayerMask _wallLayer;
     [SerializeField] private float _jumpForce = 1f;
     private bool _isGrounded = true;
+    //use below for wallclimbing
+    private bool _isAttachedToWall = false;
     private Vector2 move;
     private Rigidbody2D _playerRB;
     
@@ -30,14 +37,7 @@ public class PlayerMovementScript : MonoBehaviour
     public void OnMove(InputAction.CallbackContext context)
     {
 
-        if (_isGrounded)
-        {
             move = context.ReadValue<Vector2>();
-        }
-        else
-        {
-            move = context.ReadValue<Vector2>();
-        }
 
     }
     public void OnDash(InputAction.CallbackContext context)
@@ -64,6 +64,10 @@ public class PlayerMovementScript : MonoBehaviour
 
 
     }
+    public void OnCrouch(InputAction.CallbackContext context)
+    {
+
+    }
     public void OnJump(InputAction.CallbackContext context)
     {
         if (_isGrounded == true && (_jumpCooldown <= 0))
@@ -75,27 +79,65 @@ public class PlayerMovementScript : MonoBehaviour
         }
 
     }
+
+    //I could probably move all these raycasts to a function that returns them I think instead of this
     private void Update()
     {
-
-        //add raycasts for bottom left, bottomright, etc, etc, in order to stop jittering on corners
-
         if (move.x > 0)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, _horWallCheckDistance, _wallLayer);
+
+
+            Vector2 dirlow = new Vector2(_horWallCheckDistance, -_vertWallCheckDistance).normalized;
+
+            RaycastHit2D hitlow = Physics2D.Raycast(transform.position,dirlow,_horWallCheckDistance,_wallLayer);
+
+
+            Color debugColor = hitlow.collider != null ? Color.green : Color.red;
+            Debug.DrawRay(transform.position, new Vector2(_horWallCheckDistance, -_vertWallCheckDistance), debugColor);
+            
             if (hit.collider != null)
             {
                 move.x = 0;
+            }
+            else if (hitlow.collider != null)
+            {
+                if (_isGrounded == false)
+                {
+
+                    move.x = 0;
+                    Debug.Log("hitlow detection working");
+                }
+                //find a way to only activate this when jumping
+
             }
         }
 
         if (move.x < 0)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, _horWallCheckDistance, _wallLayer);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left,- _horWallCheckDistance, _wallLayer);
+            Vector2 dirlow = new Vector2(-_horWallCheckDistance, _vertWallCheckDistance).normalized;
+
+            RaycastHit2D hitlow = Physics2D.Raycast(transform.position, dirlow, _horWallCheckDistance, _wallLayer);
             if (hit.collider != null)
             {
                 move.x = 0;
             }
+            if (hit.collider != null)
+            {
+                move.x = 0;
+            }
+            else if (hitlow.collider != null)
+            {
+                if (_isGrounded == false)
+                {
+
+                    move.x = 0;
+                    Debug.Log("hitlow detection working");
+                }
+
+            }
+
         }
         
         if (move.y > 0)
@@ -108,6 +150,7 @@ public class PlayerMovementScript : MonoBehaviour
 
             }
         }
+        //largely unnecessary this is a leftover from top down games, however, useful for wallclimbing
         if (move.y < 0)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, _vertWallCheckDistance, _wallLayer);
@@ -116,9 +159,29 @@ public class PlayerMovementScript : MonoBehaviour
                 move.y = 0;
             }
         }
-        Vector3 direction = new Vector3(move.x, 0, 0).normalized;
-        transform.position += direction * _speed * Time.deltaTime;
+        
+        if(_isAttachedToWall == false)
+        {
+            Vector3 direction = new Vector3(move.x, 0, 0).normalized;
+            transform.position += direction * _speed * Time.deltaTime;
+        }
+        //nothing sets this script to attach to a wall but like this is just me setting it up to like you move up the wall
+        else if (_isAttachedToWall == true)
+        {
+            Vector3 direction = new Vector3(move.x, move.y, 0).normalized;
+            transform.position += direction * _speed * Time.deltaTime;
 
+        }
+
+        if (_isGrounded == true)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, _vertWallCheckDistance, _wallLayer);
+            //to make it so the player can't fall off a ledge and jump
+            if (hit.collider == null)
+            {
+                _isGrounded = false;
+            }
+        }
         //this feels bad to check this every frame but idk, all the stuff above is raycasting to check for walls
         if (_isGrounded == false && (_jumpCooldown <= 0))
         {
