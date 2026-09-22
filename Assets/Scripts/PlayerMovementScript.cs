@@ -88,13 +88,11 @@ public class PlayerMovementScript : MonoBehaviour
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, _horWallCheckDistance, _wallLayer);
 
 
-            Vector2 dirlow = new Vector2(_horWallCheckDistance, -_vertWallCheckDistance).normalized;
+            Vector2 dirlow = new Vector2(_horWallCheckDistance, _vertWallCheckDistance);
 
             RaycastHit2D hitlow = Physics2D.Raycast(transform.position,dirlow,_horWallCheckDistance,_wallLayer);
 
 
-            Color debugColor = hitlow.collider != null ? Color.green : Color.red;
-            Debug.DrawRay(transform.position, new Vector2(_horWallCheckDistance, -_vertWallCheckDistance), debugColor);
             
             if (hit.collider != null)
             {
@@ -116,13 +114,9 @@ public class PlayerMovementScript : MonoBehaviour
         if (move.x < 0)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left,- _horWallCheckDistance, _wallLayer);
-            Vector2 dirlow = new Vector2(-_horWallCheckDistance, _vertWallCheckDistance).normalized;
+            Vector2 dirlow = new Vector2(_horWallCheckDistance, _vertWallCheckDistance);
 
             RaycastHit2D hitlow = Physics2D.Raycast(transform.position, dirlow, _horWallCheckDistance, _wallLayer);
-            if (hit.collider != null)
-            {
-                move.x = 0;
-            }
             if (hit.collider != null)
             {
                 move.x = 0;

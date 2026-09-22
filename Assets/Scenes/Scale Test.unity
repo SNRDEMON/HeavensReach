@@ -1221,7 +1221,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementScript
   _vertWallCheckDistance: 1.05
   _horWallCheckDistance: 0.5
-  _dashDistance: 40
+  _dashDistance: 20
   _wallLayer:
     serializedVersion: 2
     m_Bits: 64
