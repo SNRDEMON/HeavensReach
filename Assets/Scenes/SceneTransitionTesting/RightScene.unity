@@ -288,7 +288,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTrigger
   AdjacentScene: LeftScene
-  ExitDirection: {x: 1, y: 0}
+  ExitDirection: {x: -1, y: 0}
 --- !u!61 &2062717474
 BoxCollider2D:
   m_ObjectHideFlags: 0

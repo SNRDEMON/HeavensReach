@@ -5,30 +5,23 @@ public class SceneTrigger : MonoBehaviour
 {
     [SerializeField] private string AdjacentScene;
     [SerializeField] private Vector2 ExitDirection;
+    private Vector2 entryPos;
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log($"Triggering {AdjacentScene}");
-        Vector2 velocity = other.gameObject.GetComponent<Rigidbody2D>().linearVelocity;
-        Debug.Log(velocity.x);
-        float dot = Vector2.Dot(velocity, ExitDirection);
-        if (dot > 0)
-        {
-            SceneManager.LoadSceneAsync(AdjacentScene);
-        }else if (dot < 0)
-        {
-            SceneManager.UnloadSceneAsync(AdjacentScene);
-        }
+        entryPos = other.transform.position;
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
-        Debug.Log($"Triggering {AdjacentScene}");
-        Vector2 velocity = collision.gameObject.GetComponent<Rigidbody2D>().linearVelocity;
-        Debug.Log(velocity.x);
-        float dot = Vector2.Dot(velocity, ExitDirection);
+        Vector2 exitPos = collision.transform.position;
+
+        Vector2 posDelta = exitPos - entryPos;
+        posDelta = posDelta.normalized;
+
+        float dot = Vector2.Dot(posDelta, ExitDirection);
         if (dot > 0)
         {
-            SceneManager.LoadSceneAsync(AdjacentScene);
+            SceneManager.LoadSceneAsync(AdjacentScene,LoadSceneMode.Additive);
         }
         else if (dot < 0)
         {
