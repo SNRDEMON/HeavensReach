@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,8 +9,8 @@ public class PlayerMovementScript : MonoBehaviour
 
     [Header("Wall checking Stuff")]
     [SerializeField] private float _vertWallCheckDistance = 1f;
-    [SerializeField]private float _horWallCheckDistance = 1f;
-
+    [SerializeField] private float _horWallCheckDistance = 1f;
+    //temp variable
 
     //probably move this away from being layers later but idk it works for walls
     [SerializeField] private float _dashDistance = 5f;
@@ -20,7 +21,7 @@ public class PlayerMovementScript : MonoBehaviour
     private bool _isAttachedToWall = false;
     private Vector2 move;
     private Rigidbody2D _playerRB;
-    
+
     //probably a better way to do this with like a for loop or coroutine but idk I'm lazy
     //yeah rereading this half this shit needs to be on coroutines instead of if statements I just didn't want to impliment them
     private float _jumpCooldown = 0f;
@@ -30,6 +31,11 @@ public class PlayerMovementScript : MonoBehaviour
     private float _dashCooldown = 0f;
     private float _dashAirTimeLeft = 0f;
     [SerializeField] private float _dashAirTimeSet = 1f;
+    [SerializeField] private float _ledgeNudgeAmount = 0.05f;
+    [SerializeField] private float _ledgeNudgeCooldown = 0.1f;
+    private float _ledgeNudgeTimer;
+
+
     private void Awake()
     {
         _playerRB = GetComponent<Rigidbody2D>();
@@ -37,7 +43,7 @@ public class PlayerMovementScript : MonoBehaviour
     public void OnMove(InputAction.CallbackContext context)
     {
 
-            move = context.ReadValue<Vector2>();
+        move = context.ReadValue<Vector2>();
 
     }
     public void OnDash(InputAction.CallbackContext context)
@@ -60,7 +66,7 @@ public class PlayerMovementScript : MonoBehaviour
                 _playerRB.gravityScale = 0f;
             }
         }
-       
+
 
 
     }
@@ -74,66 +80,111 @@ public class PlayerMovementScript : MonoBehaviour
         {
             _playerRB.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
             _jumpCooldown = 1f;
-            _isGrounded =false;
+            _isGrounded = false;
 
         }
 
     }
+    private Vector2[] RayOrigins = new Vector2[4];  
+  
+    private bool CheckForWalls(float moveX)
+    {
+        if (moveX == 0)
+            return false;
 
-    //I could probably move all these raycasts to a function that returns them I think instead of this
+        Vector2 direction = moveX > 0
+            ? Vector2.right
+            : Vector2.left;
+
+        Bounds bounds = GetComponent<Collider2D>().bounds;
+
+        bool centerhit =false;
+        bool tophit = false;
+        bool bottomhit = false;
+        bool lowerhit = false;
+        RayOrigins[0] = new Vector2(bounds.center.x, bounds.center.y);
+        RayOrigins[1] = new Vector2(bounds.center.x, bounds.max.y);
+        RayOrigins[2] = new Vector2(bounds.center.x, bounds.min.y);
+        RayOrigins[3] = new Vector2(bounds.center.x, bounds.min.y + 0.1f); //probs set this 0.1f to a variable later
+   
+
+        for (int i = 0; i < RayOrigins.Length;  i++)
+        {
+            Vector2 v = RayOrigins[i];
+
+            RaycastHit2D hit = Physics2D.Raycast(v, direction, _horWallCheckDistance, _wallLayer);
+
+            Debug.DrawRay(v, direction * _horWallCheckDistance, Color.green);
+
+            if (hit.collider != null)
+            {
+                if (i == 0)
+                {
+                    centerhit = true;
+
+                }
+                if (i == 1)
+                {
+                    tophit = true;
+                }
+                if (i == 2)
+                {
+                    bottomhit = true;
+                }
+                if (i == 3)
+                {
+                    lowerhit = true;
+                }
+            }
+        }
+        if (bottomhit && !lowerhit && !centerhit && !tophit)
+        {
+            if (_ledgeNudgeTimer <= 0f)
+            { 
+                _playerRB.position += Vector2.up * _ledgeNudgeAmount;
+                _ledgeNudgeTimer = _ledgeNudgeCooldown;
+            }
+            return false;
+        }
+
+        if (centerhit|| lowerhit || tophit)
+        {
+            return true;
+        }
+        return false;
+    }
+    //making the ground check also be an array too, but it's less important
+    private bool CheckForGround()
+    {
+        Bounds bounds = GetComponent<Collider2D>().bounds;
+
+        Vector2[] origins =
+{
+            new Vector2(bounds.min.x, bounds.center.y),
+            new Vector2(bounds.center.x, bounds.center.y),
+            new Vector2(bounds.max.x, bounds.center.y)
+        };
+
+        foreach (Vector2 v in origins)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(v, Vector2.down, _horWallCheckDistance, _wallLayer);
+            Debug.DrawRay(v, Vector2.down * _horWallCheckDistance, Color.green);
+        }
+
+        return false;
+
+    }
+    //I could probably move all these raycasts to a function that returns them I think instead of this (Update, working on it)
     private void Update()
     {
-        if (move.x > 0)
+        float velocityX = move.x * _speed;
+        if (CheckForWalls(move.x))
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, _horWallCheckDistance, _wallLayer);
-
-
-            Vector2 dirlow = new Vector2(_horWallCheckDistance, _vertWallCheckDistance);
-
-            RaycastHit2D hitlow = Physics2D.Raycast(transform.position,dirlow,_horWallCheckDistance,_wallLayer);
-
-
-            
-            if (hit.collider != null)
-            {
-                move.x = 0;
-            }
-            else if (hitlow.collider != null)
-            {
-                if (_isGrounded == false)
-                {
-
-                    move.x = 0;
-                    Debug.Log("hitlow detection working");
-                }
-                //find a way to only activate this when jumping
-
-            }
-        }
-
-        if (move.x < 0)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left,- _horWallCheckDistance, _wallLayer);
-            Vector2 dirlow = new Vector2(_horWallCheckDistance, _vertWallCheckDistance);
-
-            RaycastHit2D hitlow = Physics2D.Raycast(transform.position, dirlow, _horWallCheckDistance, _wallLayer);
-            if (hit.collider != null)
-            {
-                move.x = 0;
-            }
-            else if (hitlow.collider != null)
-            {
-                if (_isGrounded == false)
-                {
-
-                    move.x = 0;
-                    Debug.Log("hitlow detection working");
-                }
-
-            }
+            velocityX = 0f;
 
         }
-        
+        _playerRB.linearVelocity = new Vector2(velocityX, _playerRB.linearVelocity.y);
+
         if (move.y > 0)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, _vertWallCheckDistance, _wallLayer);
@@ -153,7 +204,7 @@ public class PlayerMovementScript : MonoBehaviour
                 move.y = 0;
             }
         }
-        
+        /*
         if(_isAttachedToWall == false)
         {
             Vector3 direction = new Vector3(move.x, 0, 0).normalized;
@@ -166,7 +217,7 @@ public class PlayerMovementScript : MonoBehaviour
             transform.position += direction * _speed * Time.deltaTime;
 
         }
-
+        */
         if (_isGrounded == true)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, _vertWallCheckDistance, _wallLayer);
@@ -193,7 +244,7 @@ public class PlayerMovementScript : MonoBehaviour
         //bad way to do a cooldown but this is here because you could jump twice before you could get off the ground so you'll want to replace it with a coroutine probably
         _jumpCooldown -= Time.deltaTime;
         _dashCooldown -= Time.deltaTime;
-          
+        _ledgeNudgeTimer -= Time.deltaTime;
         }
     //some code from my old game
 }
