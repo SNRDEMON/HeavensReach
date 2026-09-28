@@ -92,7 +92,7 @@ public class PlayerMovementScript : MonoBehaviour
             _speed = _runSpeed;
             _isCrouched = false;
             _playerCollider.size = new Vector2(1,2); //Note to self, don't keep these as hardcoded make them variables later as I clean this up
-    }
+    } //Note: Can currently stand up in crouched spaces. Could lead to clipping
         }
     public void OnJump(InputAction.CallbackContext context)
     {
