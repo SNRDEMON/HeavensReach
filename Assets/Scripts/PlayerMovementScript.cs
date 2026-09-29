@@ -22,12 +22,13 @@ public class PlayerMovementScript : MonoBehaviour
     //use below for wallclimbing
     private bool _isAttachedToWall = false;
     private Vector2 move;
+    private Vector2 _vertMove;
     private Rigidbody2D _playerRB;
     private CapsuleCollider2D _playerCollider;
     //probably a better way to do this with like a for loop or coroutine but idk I'm lazy
     //yeah rereading this half this shit needs to be on coroutines instead of if statements I just didn't want to impliment them
     private float _jumpCooldown = 0f;
-
+    private bool _isUnableToUncrouch = false;
 
     //dash variables
     [SerializeField] private float _dashDistance = 5f;
@@ -50,6 +51,10 @@ public class PlayerMovementScript : MonoBehaviour
 
         move = context.ReadValue<Vector2>();
 
+    }
+    public void OnClimb(InputAction.CallbackContext context)
+    {
+        _vertMove = context.ReadValue<Vector2>();
     }
     public void OnDash(InputAction.CallbackContext context)
     {
@@ -86,7 +91,7 @@ public class PlayerMovementScript : MonoBehaviour
             _isCrouched = true;
             _playerCollider.size = new Vector2(0.8f, 0.8f);
         }
-        else if (_isCrouched == true)
+        else if (_isCrouched == true && _isUnableToUncrouch == false)
         {
 
             _speed = _runSpeed;
@@ -168,6 +173,45 @@ public class PlayerMovementScript : MonoBehaviour
         }
 
         if (centerhit|| lowerhit || tophit)
+        {
+            return true;
+        }
+        return false;
+    }
+    private Vector2[] TopRayOrigins = new Vector2[3];
+    private bool CheckForCeiling()
+    {
+        Bounds bounds = GetComponent<Collider2D>().bounds;
+        bool lefthit = false;
+        bool centerhit = false;
+        bool righthit = false;
+        TopRayOrigins[0] = new Vector2(bounds.min.x, bounds.max.y);
+        TopRayOrigins[1] = new Vector2(bounds.center.x, bounds.max.y);
+        TopRayOrigins[2] = new Vector2(bounds.max.x, bounds.max.y);
+        for (int i = 0; i < TopRayOrigins.Length; i++)
+        {
+            Vector2 v = TopRayOrigins[i];
+            RaycastHit2D hit = Physics2D.Raycast(v, Vector2.up, _horWallCheckDistance, _wallLayer);
+            Debug.DrawRay(v, Vector2.up * _horWallCheckDistance, Color.green);
+            if (hit.collider != null)
+            {
+                if (i == 0)
+                {
+                    lefthit = true;
+
+                }
+                if (i == 1)
+                {
+                    centerhit = true;
+                }
+                if (i == 2)
+                {
+                    righthit = true;
+                }
+            }
+
+        }
+        if (centerhit || lefthit || righthit)
         {
             return true;
         }
@@ -268,6 +312,16 @@ public class PlayerMovementScript : MonoBehaviour
 
         }
         */
+        CheckForCeiling();
+        if (CheckForCeiling() == true)
+        {
+            _isUnableToUncrouch = true;
+        }
+        else if (CheckForCeiling() == false)
+        {
+            _isUnableToUncrouch = false;
+        }
+
         CheckForGround();
         if (CheckForGround() == true)
         {
