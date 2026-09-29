@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class DroneBehavior : EnemyBehavior
 {
     [SerializeField] private List<Vector2> PatrolPath;
@@ -23,6 +24,17 @@ public class DroneBehavior : EnemyBehavior
     private void Patrol()
     {
         Vector2 dir = PatrolPath[patrolLoopIndex] - (Vector2)transform.position;
+        float dist = dir.magnitude;
+        if(dist < patrolSpeed)
+        {
+            transform.position = PatrolPath[patrolLoopIndex];
+            patrolLoopIndex++;
+            if (patrolLoopIndex >= PatrolPath.Count) patrolLoopIndex = 0;
+        }
+        else
+        {
+
+        }
 
     }
 }
