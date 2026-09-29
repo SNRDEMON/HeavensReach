@@ -28,4 +28,15 @@ public class SceneTrigger : MonoBehaviour
             SceneManager.UnloadSceneAsync(AdjacentScene);
         }
     }
+
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.hotPink;
+        Gizmos.DrawSphere(transform.position, 0.1f);
+        Gizmos.DrawLine ((Vector2)transform.position, (Vector2)transform.position + ExitDirection);
+    }
+#endif
+
 }
