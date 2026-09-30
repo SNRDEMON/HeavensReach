@@ -51,4 +51,12 @@ public class FSM : MonoBehaviour
         }
        
     }
+
+    public void OnJumpPlay(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            _anim.Play("JumpStart");
+        }
+    }
 }
