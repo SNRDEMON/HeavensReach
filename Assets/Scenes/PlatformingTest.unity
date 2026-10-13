@@ -3690,7 +3690,19 @@ MonoBehaviour:
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2120871519}
+        m_TargetAssemblyTypeName: PlayerMovementScript, Assembly-CSharp
+        m_MethodName: OnClimb
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 3a48aa43-541a-447c-b3ec-b7e5092eb4fe
     m_ActionName: 'Player/MoveUpDown[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow]'
   m_NeverAutoSwitchControlSchemes: 0
@@ -3781,6 +3793,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c43ed7fcf10f984d92b7c3f7c6a8c78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FSM
+  isCrouched: 0
 --- !u!95 &2120871526
 Animator:
   serializedVersion: 7

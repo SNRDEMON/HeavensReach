@@ -66,7 +66,7 @@ public class PlayerMovementScript : MonoBehaviour
                 _dashCooldown = 1f;
                 _dashAirTimeLeft = _dashAirTimeSet;
                 _isDashing = true;
-                //    _playerRB.gravityScale = 0f;
+                    _playerRB.gravityScale = 0.1f;
             }
             else if (move.x > 0f)
             {
@@ -74,7 +74,7 @@ public class PlayerMovementScript : MonoBehaviour
                 _dashCooldown = 1f;
                 _dashAirTimeLeft = _dashAirTimeSet;
                 _isDashing = true;
-                //    _playerRB.gravityScale = 0f;
+                    _playerRB.gravityScale = 0.1f;
             }
         }
 
@@ -174,6 +174,7 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (centerhit|| lowerhit || tophit)
         {
+            _isAttachedToWall = true;
             return true;
         }
         return false;
@@ -253,11 +254,16 @@ public class PlayerMovementScript : MonoBehaviour
         }
         if (centerhit || lefthit || righthit)
         {
+          
             return true;
         }
         return false;
 
-}
+    }
+    private void AttachToWall()
+    {
+        _playerRB.gravityScale = 0f;
+    }
     //I could probably move all these raycasts to a function that returns them I think instead of this (Update, working on it)
     private void Update()
     {
@@ -275,7 +281,12 @@ public class PlayerMovementScript : MonoBehaviour
             }
             _playerRB.linearVelocity = new Vector2(velocityX, _playerRB.linearVelocity.y);
         }
- 
+        if (_isAttachedToWall == true)
+        {
+            float velocityY = _vertMove.y * _speed;
+
+            _playerRB.linearVelocity = new Vector2(_playerRB.linearVelocity.x, velocityY);
+        }
 
             
 
@@ -312,6 +323,8 @@ public class PlayerMovementScript : MonoBehaviour
 
         }
         */
+
+
         CheckForCeiling();
         if (CheckForCeiling() == true)
         {
@@ -339,12 +352,12 @@ public class PlayerMovementScript : MonoBehaviour
             }
                // Debug.Log("This is the false return for jump");
         }
-  /*      if (_dashAirTimeLeft <= 0)
+        if (_dashAirTimeLeft <= 0)
         {
             _playerRB.gravityScale = 1f;
         }
 
-  */
+  
         //bad way to do a cooldown but this is here because you could jump twice before you could get off the ground so you'll want to replace it with a coroutine probably
         _jumpCooldown -= Time.deltaTime;
         _dashAirTimeLeft -= Time.deltaTime;
