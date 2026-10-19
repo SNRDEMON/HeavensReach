@@ -174,9 +174,14 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (centerhit|| lowerhit || tophit)
         {
-            _isAttachedToWall = true;
+            if (!CheckForGround())
+            {
+                _isAttachedToWall = true;
+            }
+
             return true;
         }
+        _isAttachedToWall = false;
         return false;
     }
     private Vector2[] TopRayOrigins = new Vector2[3];
