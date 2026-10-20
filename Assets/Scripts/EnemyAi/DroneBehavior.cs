@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using NavMeshPlus.Components;
 using UnityEngine.AI;
+using System.Collections;
 
 
 public class DroneBehavior : EnemyBehavior
@@ -11,9 +12,12 @@ public class DroneBehavior : EnemyBehavior
     [SerializeField] private float patrolSpeed;
     [SerializeField] private NavMeshSurface myMesh;
     [SerializeField] private NavMeshAgent myAgent;
+    [SerializeField] private EnemyVision eyes;
 
     private PatrolState curState = PatrolState.Patrol;
     private int patrolLoopIndex;
+
+    private Vector2 lastKnownPlayerLocation;
 
     private void OnEnable()
     {
@@ -29,7 +33,17 @@ public class DroneBehavior : EnemyBehavior
             case PatrolState.Patrol:
                 Patrol();
                 break;
+            case PatrolState.Suspicion:
+                break;
         }
+    }
+
+    private bool SeePlayer()
+    {
+        Vector2 locale;
+        bool playerSeen = eyes.CanSeePlayer(out locale);
+        if (playerSeen) lastKnownPlayerLocation = locale;
+        return playerSeen;
     }
 
     private void Patrol()
@@ -59,6 +73,8 @@ public class DroneBehavior : EnemyBehavior
             }
         }
 
+        if (SeePlayer()) curState = PatrolState.Suspicion;
+
     }
 
 
@@ -75,4 +91,17 @@ public class DroneBehavior : EnemyBehavior
         }
     }
 #endif
+
+
+    private IEnumerator SustainedVision()
+    {
+        int i = 0;
+        while (SeePlayer())
+        {
+            yield return null;
+            i++;
+            if (i >= 4) curState = PatrolState.Suspicion;
+        }
+    }
+
 }
