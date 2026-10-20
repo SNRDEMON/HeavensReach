@@ -29,7 +29,7 @@ public class PlayerMovementScript : MonoBehaviour
     //yeah rereading this half this shit needs to be on coroutines instead of if statements I just didn't want to impliment them
     private float _jumpCooldown = 0f;
     private bool _isUnableToUncrouch = false;
-
+    [Header("DashS Stuff")]
     //dash variables
     [SerializeField] private float _dashDistance = 5f;
     public float _dashCooldown = 0f;
