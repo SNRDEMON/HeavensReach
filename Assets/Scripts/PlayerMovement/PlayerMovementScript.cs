@@ -138,15 +138,23 @@ public class PlayerMovementScript : MonoBehaviour
             Vector2 v = SideRayOrigins[i];
 
             RaycastHit2D hit = Physics2D.Raycast(v, direction, _horWallCheckDistance, _wallLayer);
-
+            
             Debug.DrawRay(v, direction * _horWallCheckDistance, Color.green);
 
             if (hit.collider != null)
             {
+
                 if (i == 0)
                 {
                     centerhit = true;
+                    if (hit.collider.TryGetComponent(out StickyWall stick))
+                    {
+                        if (!CheckForGround())
+                        {
 
+                            _isAttachedToWall = true;
+                        }
+                    }
                 }
                 if (i == 1)
                 {
@@ -174,13 +182,12 @@ public class PlayerMovementScript : MonoBehaviour
 
         if (centerhit|| lowerhit || tophit)
         {
-            if (!CheckForGround())
-            {
-                _isAttachedToWall = true;
-            }
+
+
 
             return true;
         }
+        
         _isAttachedToWall = false;
         return false;
     }
@@ -295,7 +302,7 @@ public class PlayerMovementScript : MonoBehaviour
 
             
 
-        if (move.y > 0)
+       /* if (move.y > 0)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up, _vertWallCheckDistance, _wallLayer);
             if (hit.collider != null)
@@ -306,7 +313,7 @@ public class PlayerMovementScript : MonoBehaviour
             }
         }
         //largely unnecessary this is a leftover from top down games, however, useful for wallclimbing
-        if (move.y < 0)
+       /* if (move.y < 0)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, _vertWallCheckDistance, _wallLayer);
             if (hit.collider != null)
