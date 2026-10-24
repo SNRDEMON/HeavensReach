@@ -3792,6 +3792,8 @@ MonoBehaviour:
   _dashAirTimeSet: 0.25
   _ledgeNudgeAmount: 0.05
   _ledgeNudgeCooldown: 0.1
+  _slideTime: 1
+  _isSprinting: 0
 --- !u!114 &2120871520
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3901,7 +3903,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2120871519}
         m_TargetAssemblyTypeName: PlayerMovementScript, Assembly-CSharp
-        m_MethodName: OnDash
+        m_MethodName: OnSprint
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3969,6 +3971,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 3a48aa43-541a-447c-b3ec-b7e5092eb4fe
     m_ActionName: 'Player/MoveUpDown[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2120871519}
+        m_TargetAssemblyTypeName: PlayerMovementScript, Assembly-CSharp
+        m_MethodName: OnDash
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3466cbec-2f8d-49e3-8c2c-acb9f93cfdb4
+    m_ActionName: 'Player/Dash[/Mouse/rightButton]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player

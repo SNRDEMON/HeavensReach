@@ -6,8 +6,9 @@ public class PlayerMovementScript : MonoBehaviour
 {
 
     private float _speed = 5f;
-    private float _runSpeed = 5f;
+    private float _runSpeed = 8f;
     private float _crouchSpeed = 2.5f;
+    private float _walkSpeed = 5f;
     private bool _isCrouched = false;
     [Header("Wall checking Stuff")]
     [SerializeField] private float _vertWallCheckDistance = 1f;
@@ -40,6 +41,12 @@ public class PlayerMovementScript : MonoBehaviour
     [SerializeField] private float _ledgeNudgeCooldown = 0.1f;
     private float _ledgeNudgeTimer;
 
+    [Header("Slide stuff")]
+    [SerializeField] private float _slideTime = 1f;
+
+
+    [Header("Sprint stuff")]
+    [SerializeField] private bool _isSprinting;
 
     private void Awake()
     {
@@ -56,17 +63,101 @@ public class PlayerMovementScript : MonoBehaviour
     {
         _vertMove = context.ReadValue<Vector2>();
     }
+    public void OnSprint(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            _isSprinting = true;
+            _speed = _runSpeed;
+        }
+
+
+        if (context.canceled)
+        {
+            _isSprinting = false;
+            _speed = _walkSpeed;
+        }
+
+    }
     public void OnDash(InputAction.CallbackContext context)
     {
         if (_dashCooldown <= 0f)
         {
-            if (move.x < 0f)
+            if (!_isCrouched)
             {
-                _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
+                if (move.x < 0f)
+                {
+                    _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
+                    _dashCooldown = 1f;
+                    _dashAirTimeLeft = _dashAirTimeSet;
+                    _isDashing = true;
+
+                 //   _playerRB.gravityScale = 0.1f;
+                    Debug.Log("Tried To dash1");
+                }
+                else if (move.x > 0f)
+                {
+                    _playerRB.AddForce(Vector2.right * _dashDistance, ForceMode2D.Impulse);
+                    _dashCooldown = 1f;
+                    _dashAirTimeLeft = _dashAirTimeSet;
+                    _isDashing = true;
+                 //   _playerRB.gravityScale = 0.1f;
+                    Debug.Log("Tried To dash2");
+                }
+            }
+            Debug.Log("Tried To dash3");
+        }
+
+
+
+
+    }
+    //is a mess work on this
+    public void OnCrouch(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            if (!_isSprinting)
+            {
+
+                if (_isCrouched == false)
+                {
+
+                    _speed = _crouchSpeed;
+                    _isCrouched = true;
+                    _playerCollider.size = new Vector2(0.8f, 0.8f);
+                }
+                //put a crouch function here
+                Debug.Log("CrouchStarted");
+            }
+        }
+        if (context.canceled)
+        {
+            Debug.Log("UncrouchedScriptRun");
+            if (_isCrouched == true && _isUnableToUncrouch == false)
+            {
+
+                _speed = _walkSpeed;
+                _isCrouched = false;
+                _playerCollider.size = new Vector2(1, 2);
+            }
+
+            //put uncrouch functions here
+        }
+
+
+    }
+    
+
+     //       if (move.x < 0f)
+         //   {
+        /*        _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
                 _dashCooldown = 1f;
                 _dashAirTimeLeft = _dashAirTimeSet;
                 _isDashing = true;
-                    _playerRB.gravityScale = 0.1f;
+                _playerRB.gravityScale = 0.1f;
+                _isCrouched = true;
+                _playerCollider.size = new Vector2(0.8f, 0.8f);
             }
             else if (move.x > 0f)
             {
@@ -74,31 +165,15 @@ public class PlayerMovementScript : MonoBehaviour
                 _dashCooldown = 1f;
                 _dashAirTimeLeft = _dashAirTimeSet;
                 _isDashing = true;
-                    _playerRB.gravityScale = 0.1f;
-            }
-        }
-
-
-
-
-    }
-    public void OnCrouch(InputAction.CallbackContext context)
-    {
-        _speed = _crouchSpeed;
-        if (_isCrouched == false)
-        {
-            _speed = _crouchSpeed;
-            _isCrouched = true;
-            _playerCollider.size = new Vector2(0.8f, 0.8f);
-        }
-        else if (_isCrouched == true && _isUnableToUncrouch == false)
-        {
-
-            _speed = _runSpeed;
-            _isCrouched = false;
-            _playerCollider.size = new Vector2(1,2); //Note to self, don't keep these as hardcoded make them variables later as I clean this up
-    } //Note: Can currently stand up in crouched spaces. Could lead to clipping
-        }
+                _playerRB.gravityScale = 0.1f;
+                _isCrouched = true;
+                _playerCollider.size = new Vector2(0.8f, 0.8f);
+           */
+     //   } 
+            //Note to self, don't keep these as hardcoded make them variables later as I clean this up
+     
+//Note: Can currently stand up in crouched spaces. Could lead to clipping
+        
     public void OnJump(InputAction.CallbackContext context)
     {
         if (_isGrounded == true && (_jumpCooldown <= 0))
