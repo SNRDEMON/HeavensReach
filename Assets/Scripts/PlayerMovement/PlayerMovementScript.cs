@@ -1,6 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class PlayerMovementScript : MonoBehaviour
 {
@@ -30,7 +31,7 @@ public class PlayerMovementScript : MonoBehaviour
     //yeah rereading this half this shit needs to be on coroutines instead of if statements I just didn't want to impliment them
     private float _jumpCooldown = 0f;
     private bool _isUnableToUncrouch = false;
-    [Header("DashS Stuff")]
+    [Header("Dash Stuff")]
     //dash variables
     [SerializeField] private float _dashDistance = 5f;
     public float _dashCooldown = 0f;
@@ -48,15 +49,27 @@ public class PlayerMovementScript : MonoBehaviour
     [Header("Sprint stuff")]
     [SerializeField] private bool _isSprinting;
 
+    [Header("AirStrafe Stuff")]
+    [SerializeField] private float _jumpStrafeDrag = 0.8f;
+    [SerializeField] private float _jumpStrafeSpeedUp = 1.2f;
     private void Awake()
     {
         _playerRB = GetComponent<Rigidbody2D>();
         _playerCollider = GetComponent<CapsuleCollider2D>();
     }
+    private bool _xMoveButtonHeldDown;
     public void OnMove(InputAction.CallbackContext context)
     {
-
-        move = context.ReadValue<Vector2>();
+        if (context.started)
+        {
+            move = context.ReadValue<Vector2>();
+            _xMoveButtonHeldDown = true;
+        }
+        if (context.canceled)
+        {
+            move = context.ReadValue<Vector2>();
+            _xMoveButtonHeldDown = false;
+        }
 
     }
     public void OnClimb(InputAction.CallbackContext context)
@@ -113,6 +126,7 @@ public class PlayerMovementScript : MonoBehaviour
 
     }
     //is a mess work on this
+    private bool _isSliding = false;
     public void OnCrouch(InputAction.CallbackContext context)
     {
         if (context.started)
@@ -130,50 +144,54 @@ public class PlayerMovementScript : MonoBehaviour
                 //put a crouch function here
                 Debug.Log("CrouchStarted");
             }
-        }
-        if (context.canceled)
-        {
-            Debug.Log("UncrouchedScriptRun");
-            if (_isCrouched == true && _isUnableToUncrouch == false)
+            else if (_isSprinting)
             {
-
-                _speed = _walkSpeed;
-                _isCrouched = false;
-                _playerCollider.size = new Vector2(1, 2);
+                if (move.x < 0f)
+                {
+                    _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
+                    _isSliding = true;
+                    _isCrouched = true;
+                    _playerCollider.size = new Vector2(0.8f, 0.8f);
+                }
+                else if (move.x > 0f)
+                {
+                    _playerRB.AddForce(Vector2.right * _dashDistance, ForceMode2D.Impulse);
+                    _isSliding = true;
+                    _isCrouched = true;
+                    _playerCollider.size = new Vector2(0.8f, 0.8f);
+                }
             }
-
-            //put uncrouch functions here
         }
+     if (context.canceled)
+     {
+        Debug.Log("UncrouchedScriptRun");
+         if (_isCrouched == true && _isUnableToUncrouch == false)
+        {
 
+                    _speed = _walkSpeed;
+                    _isCrouched = false;
+                    _isSliding = false;
+                    _playerCollider.size = new Vector2(1, 2);
+                    
+         }
 
-    }
+                //put uncrouch functions here
+     }
+
+        
     
 
-     //       if (move.x < 0f)
-         //   {
-        /*        _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
-                _dashCooldown = 1f;
-                _dashAirTimeLeft = _dashAirTimeSet;
-                _isDashing = true;
-                _playerRB.gravityScale = 0.1f;
-                _isCrouched = true;
-                _playerCollider.size = new Vector2(0.8f, 0.8f);
-            }
-            else if (move.x > 0f)
-            {
-                _playerRB.AddForce(Vector2.right * _dashDistance, ForceMode2D.Impulse);
-                _dashCooldown = 1f;
-                _dashAirTimeLeft = _dashAirTimeSet;
-                _isDashing = true;
-                _playerRB.gravityScale = 0.1f;
-                _isCrouched = true;
-                _playerCollider.size = new Vector2(0.8f, 0.8f);
-           */
-     //   } 
-            //Note to self, don't keep these as hardcoded make them variables later as I clean this up
-     
-//Note: Can currently stand up in crouched spaces. Could lead to clipping
-        
+
+
+}
+    //Note to self, don't keep these as hardcoded make them variables later as I clean this up
+
+    //Note: Can currently stand up in crouched spaces. Could lead to clipping
+
+    private bool _jumpMovementGraceActive = false;
+    private float _jumpMovementGrace;
+    //this gives time for you to change direction as you jump, adjust as necessary
+    private float _jumpMovementGraceDuration = 0.1f;
     public void OnJump(InputAction.CallbackContext context)
     {
         if (_isGrounded == true && (_jumpCooldown <= 0))
@@ -181,6 +199,8 @@ public class PlayerMovementScript : MonoBehaviour
             _playerRB.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
             _jumpCooldown = 1f;
             _isGrounded = false;
+            _jumpMovementGraceActive = true;
+            _jumpMovementGrace = _jumpMovementGraceDuration;
 
         }
 
@@ -347,9 +367,24 @@ public class PlayerMovementScript : MonoBehaviour
         return false;
 
     }
+    public bool _inAirLeft = false; //reset to private later
+    private bool _inAirRight = false;
+
+    //function for checking what direction the player is moving for the sake of moving back and forth while in air
+    private float _jumpDirection;
+    private void KeepAirDirection()
+    {
+        _jumpDirection = Mathf.Sign(move.x);
+    }
     private void AttachToWall()
     {
         _playerRB.gravityScale = 0f;
+    }
+
+    //shove more of the update stuff in here maybe
+    private void MovePlayerWithPhysicsHorizontal(float velocityX)
+    {
+        _playerRB.linearVelocity = new Vector2(velocityX, _playerRB.linearVelocity.y);
     }
     //I could probably move all these raycasts to a function that returns them I think instead of this (Update, working on it)
     private void Update()
@@ -358,15 +393,82 @@ public class PlayerMovementScript : MonoBehaviour
         {
             _isDashing = false;
         }
-        if (!_isDashing)
+        if (!_isDashing && !_isSliding)
         {
-            float velocityX = move.x * _speed;
-            if (CheckForWalls(move.x))
+            if (_isGrounded || _jumpMovementGraceActive || _isAttachedToWall)
             {
-                velocityX = 0f;
+                float velocityX = move.x * _speed;
+                KeepAirDirection();
+                Debug.Log(move.x);
+                if (CheckForWalls(move.x))
+                {
+                    velocityX = 0f;
 
+                }
+                MovePlayerWithPhysicsHorizontal(velocityX);
             }
-            _playerRB.linearVelocity = new Vector2(velocityX, _playerRB.linearVelocity.y);
+            if (!_isGrounded && !_jumpMovementGraceActive)
+            {
+                if (!_xMoveButtonHeldDown)
+                {
+                    float velocityX = _playerRB.linearVelocityX;
+                    if (CheckForWalls(1))
+                    {
+                        velocityX = 0f;
+                    }
+
+                    if (CheckForWalls(-1))
+                    {
+                        velocityX = 0f;
+                    }
+                    MovePlayerWithPhysicsHorizontal(velocityX);
+                }
+                //this one is so long I could probably shorten it but whatever at this point
+
+                
+                if (_xMoveButtonHeldDown && _jumpDirection != 0f)
+                {
+                    float inputDirection = Mathf.Sign(move.x);
+                   
+                    if (inputDirection != 0f)
+                    {
+                        float velocityX = _playerRB.linearVelocityX;
+                            
+                        if (inputDirection != _jumpDirection)
+                        {
+                           velocityX = Mathf.MoveTowards(velocityX, 0f, _jumpStrafeDrag * Time.fixedDeltaTime);
+                        }
+                        if (inputDirection == _jumpDirection)
+                        {
+                            velocityX = move.x * _speed;
+                            if (CheckForWalls(move.x))
+                            {
+                                velocityX = 0f;
+
+                            }
+
+                        }
+                        MovePlayerWithPhysicsHorizontal(velocityX);
+                    }
+                    if (_inAirLeft)
+                    {
+                        if (move.x > 0f)
+                        {
+                        }
+                        else if (move.x < 0f)
+                        {
+                            
+                            float velocityX = _playerRB.linearVelocityX * 1.02f;
+
+                        }
+                    }
+                    if (_inAirRight)
+                    {
+                        float velocityX = move.x * _speed;
+                    }
+
+                }
+            }
         }
         if (_isAttachedToWall == true)
         {
@@ -374,7 +476,7 @@ public class PlayerMovementScript : MonoBehaviour
 
             _playerRB.linearVelocity = new Vector2(_playerRB.linearVelocity.x, velocityY);
         }
-
+        
             
 
        /* if (move.y > 0)
@@ -425,9 +527,17 @@ public class PlayerMovementScript : MonoBehaviour
         CheckForGround();
         if (CheckForGround() == true)
         {
+            if (!_jumpMovementGraceActive)
+            {
+                _inAirLeft = false;
+                _inAirRight = false;
+            }
+
             if (_isGrounded == false && (_jumpCooldown <= 0))
             {
                 _isGrounded = true;
+
+
             }
                // Debug.Log("check for ground array working");
         }
@@ -436,6 +546,7 @@ public class PlayerMovementScript : MonoBehaviour
             if (_isGrounded == true)
             {
                 _isGrounded = false;
+    
             }
                // Debug.Log("This is the false return for jump");
         }
@@ -443,13 +554,18 @@ public class PlayerMovementScript : MonoBehaviour
         {
             _playerRB.gravityScale = 1f;
         }
+        if (_jumpMovementGrace <= 0)
+        {
+            _jumpMovementGraceActive = false;
 
+        }
   
         //bad way to do a cooldown but this is here because you could jump twice before you could get off the ground so you'll want to replace it with a coroutine probably
         _jumpCooldown -= Time.deltaTime;
         _dashAirTimeLeft -= Time.deltaTime;
         _ledgeNudgeTimer -= Time.deltaTime;
         _dashCooldown -= Time.deltaTime;
+        _jumpMovementGrace -= Time.deltaTime;
         }
     //some code from my old game
 }
