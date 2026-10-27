@@ -100,21 +100,28 @@ public class PlayerMovementScript : MonoBehaviour
             {
                 if (move.x < 0f)
                 {
+                     _playerRB.linearVelocityX = 0f;       
+                    _playerRB.linearVelocityY = 0f;
+                    KeepAirDirection();
                     _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
                     _dashCooldown = 1f;
                     _dashAirTimeLeft = _dashAirTimeSet;
                     _isDashing = true;
-
-                 //   _playerRB.gravityScale = 0.1f;
+                    _playerRB.gravityScale = 0.1f;
+                   
                     Debug.Log("Tried To dash1");
                 }
                 else if (move.x > 0f)
                 {
+                    _playerRB.linearVelocityX = 0f;
+                    _playerRB.linearVelocityY = 0f;
+                    KeepAirDirection();
                     _playerRB.AddForce(Vector2.right * _dashDistance, ForceMode2D.Impulse);
                     _dashCooldown = 1f;
                     _dashAirTimeLeft = _dashAirTimeSet;
                     _isDashing = true;
-                 //   _playerRB.gravityScale = 0.1f;
+                   _playerRB.gravityScale = 0.1f;
+ 
                     Debug.Log("Tried To dash2");
                 }
             }
@@ -411,7 +418,9 @@ public class PlayerMovementScript : MonoBehaviour
             {
                 if (!_xMoveButtonHeldDown)
                 {
+
                     float velocityX = _playerRB.linearVelocityX;
+                    velocityX = Mathf.MoveTowards(velocityX, 0f, _jumpStrafeDrag * Time.fixedDeltaTime);
                     if (CheckForWalls(1))
                     {
                         velocityX = 0f;
@@ -436,8 +445,8 @@ public class PlayerMovementScript : MonoBehaviour
                             
                         if (inputDirection != _jumpDirection)
                         {
-                           velocityX = Mathf.MoveTowards(velocityX, inputDirection * 15f * 0.9f, _jumpStrafeDrag * Time.fixedDeltaTime);
-                           Debug.Log("INPUT DIR IS OPPOSITE TO JUMP DIR");
+                           velocityX = Mathf.MoveTowards(velocityX, inputDirection * 15f * 0.9f, _jumpStrafeDrag * Time.fixedDeltaTime); //replace these with different things, like the 15f with a max velocity
+                  
                         }
                         if (inputDirection == _jumpDirection)
                         {
@@ -474,7 +483,7 @@ public class PlayerMovementScript : MonoBehaviour
         if (_isAttachedToWall == true)
         {
             float velocityY = _vertMove.y * _speed;
-
+            KeepAirDirection();
             _playerRB.linearVelocity = new Vector2(_playerRB.linearVelocity.x, velocityY);
         }
         

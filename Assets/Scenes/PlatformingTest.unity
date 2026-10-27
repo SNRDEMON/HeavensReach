@@ -3794,6 +3794,9 @@ MonoBehaviour:
   _ledgeNudgeCooldown: 0.1
   _slideTime: 1
   _isSprinting: 0
+  _jumpStrafeDrag: 10
+  _jumpStrafeSpeedUp: 1.2
+  _inAirLeft: 0
 --- !u!114 &2120871520
 MonoBehaviour:
   m_ObjectHideFlags: 0
