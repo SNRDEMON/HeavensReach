@@ -3,6 +3,7 @@ using UnityEngine;
 using NavMeshPlus.Components;
 using UnityEngine.AI;
 using System.Collections;
+using UnityEditor;
 
 
 public class DroneBehavior : EnemyBehavior
@@ -34,6 +35,7 @@ public class DroneBehavior : EnemyBehavior
                 Patrol();
                 break;
             case PatrolState.Suspicion:
+                Suspicion();
                 break;
         }
     }
@@ -48,33 +50,31 @@ public class DroneBehavior : EnemyBehavior
 
     private void Patrol()
     {
+        myAgent.speed = patrolSpeed;
         Vector2 dir = PatrolPath[patrolLoopIndex] - (Vector2)transform.position;
         float dist = dir.magnitude;
-        if(dist < patrolSpeed)
+        if(dist < patrolSpeed * 0.3f)
         {
-            transform.position = PatrolPath[patrolLoopIndex];
+            //transform.position = PatrolPath[patrolLoopIndex];
             patrolLoopIndex++;
             if (patrolLoopIndex >= PatrolPath.Count) patrolLoopIndex = 0;
-            NavMeshPath path = new NavMeshPath();
-            if (myAgent.CalculatePath(PatrolPath[patrolLoopIndex], path))
-            {
-                myAgent.SetPath(path);
-            }
+
+            myAgent.SetDestination(PatrolPath[patrolLoopIndex]);
         }
         else
         {
-            if (myAgent.path == null)
-            {
-                NavMeshPath path = new NavMeshPath();
-                if (myAgent.CalculatePath(PatrolPath[patrolLoopIndex], path))
-                {
-                    myAgent.SetPath(path);
-                }
-            }
+            myAgent.SetDestination(PatrolPath[patrolLoopIndex]);
         }
 
         if (SeePlayer()) curState = PatrolState.Suspicion;
 
+    }
+
+    private void Suspicion()
+    {
+        myAgent.SetDestination(lastKnownPlayerLocation);
+        eyes.PointView(lastKnownPlayerLocation);
+        SeePlayer();
     }
 
 
@@ -83,6 +83,7 @@ public class DroneBehavior : EnemyBehavior
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.magenta;
+        Handles.color = Color.magenta;
         for (int i = 0; i < PatrolPath.Count; i++)
         {
             Gizmos.DrawSphere(PatrolPath[i], 0.2f);

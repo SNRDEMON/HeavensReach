@@ -15,6 +15,16 @@ public class EnemyVision : MonoBehaviour
         mirrorX = !mirrorX;
     }
 
+    public void PointView(float angle)
+    {
+        viewAngle = angle / 60.0f;
+    }
+
+    public void PointView(Vector2 target)
+    {
+        viewAngle = Vector2.Angle(transform.position, target);
+    }
+
     public bool CanSeePlayer(out Vector2 spot)
     {
         spot = new Vector2();
