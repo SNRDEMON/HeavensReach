@@ -399,7 +399,7 @@ public class PlayerMovementScript : MonoBehaviour
             {
                 float velocityX = move.x * _speed;
                 KeepAirDirection();
-                Debug.Log(move.x);
+               // Debug.Log(move.x);
                 if (CheckForWalls(move.x))
                 {
                     velocityX = 0f;
@@ -436,7 +436,8 @@ public class PlayerMovementScript : MonoBehaviour
                             
                         if (inputDirection != _jumpDirection)
                         {
-                           velocityX = Mathf.MoveTowards(velocityX, 0f, _jumpStrafeDrag * Time.fixedDeltaTime);
+                           velocityX = Mathf.MoveTowards(velocityX, inputDirection * 15f * 0.9f, _jumpStrafeDrag * Time.fixedDeltaTime);
+                           Debug.Log("INPUT DIR IS OPPOSITE TO JUMP DIR");
                         }
                         if (inputDirection == _jumpDirection)
                         {
@@ -450,7 +451,7 @@ public class PlayerMovementScript : MonoBehaviour
                         }
                         MovePlayerWithPhysicsHorizontal(velocityX);
                     }
-                    if (_inAirLeft)
+                  /*  if (_inAirLeft)
                     {
                         if (move.x > 0f)
                         {
@@ -465,7 +466,7 @@ public class PlayerMovementScript : MonoBehaviour
                     if (_inAirRight)
                     {
                         float velocityX = move.x * _speed;
-                    }
+                    } */
 
                 }
             }
@@ -536,8 +537,6 @@ public class PlayerMovementScript : MonoBehaviour
             if (_isGrounded == false && (_jumpCooldown <= 0))
             {
                 _isGrounded = true;
-
-
             }
                // Debug.Log("check for ground array working");
         }
