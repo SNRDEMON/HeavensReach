@@ -21,10 +21,12 @@ public class SceneTrigger : MonoBehaviour
         float dot = Vector2.Dot(posDelta, ExitDirection);
         if (dot > 0)
         {
+            if (!SceneManager.GetSceneByName(AdjacentScene).isLoaded)
             SceneManager.LoadSceneAsync(AdjacentScene,LoadSceneMode.Additive);
         }
         else if (dot < 0)
         {
+            if (SceneManager.GetSceneByName(AdjacentScene).isLoaded)
             SceneManager.UnloadSceneAsync(AdjacentScene);
         }
     }
