@@ -60,16 +60,11 @@ public class PlayerMovementScript : MonoBehaviour
     private bool _xMoveButtonHeldDown;
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (context.started)
-        {
+
+
             move = context.ReadValue<Vector2>();
-            _xMoveButtonHeldDown = true;
-        }
-        if (context.canceled)
-        {
-            move = context.ReadValue<Vector2>();
-            _xMoveButtonHeldDown = false;
-        }
+            _xMoveButtonHeldDown = Mathf.Abs(move.x) > 0.01f;
+        
 
     }
     public void OnClimb(InputAction.CallbackContext context)
@@ -184,7 +179,7 @@ public class PlayerMovementScript : MonoBehaviour
                    _speed = _walkSpeed;
                     _isCrouched = false;
                     _isSliding = false;
-                    _playerCollider.size = new Vector2(1, 2);
+                    _playerCollider.size = new Vector2(1, 1.9f);
                     
          }
 
@@ -426,7 +421,7 @@ public class PlayerMovementScript : MonoBehaviour
                 {
 
                     float velocityX = _playerRB.linearVelocityX;
-                    velocityX = Mathf.MoveTowards(velocityX, 0f, _jumpStrafeDrag * Time.fixedDeltaTime);
+                    velocityX = Mathf.MoveTowards(velocityX, 0f, _jumpStrafeDrag * Time.deltaTime);
                     if (CheckForWalls(1))
                     {
                         velocityX = 0f;
@@ -451,7 +446,7 @@ public class PlayerMovementScript : MonoBehaviour
                             
                         if (inputDirection != _jumpDirection)
                         {
-                           velocityX = Mathf.MoveTowards(velocityX, inputDirection * 15f * 0.9f, _jumpStrafeDrag * Time.fixedDeltaTime); //replace these with different things, like the 15f with a max velocity
+                           velocityX = Mathf.MoveTowards(velocityX, inputDirection * 15f * 0.9f, _jumpStrafeDrag * Time.deltaTime); //replace these with different things, like the 15f with a max velocity
                   
                         }
                         if (inputDirection == _jumpDirection)

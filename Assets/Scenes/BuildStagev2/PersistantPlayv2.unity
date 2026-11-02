@@ -364,7 +364,7 @@ CapsuleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
+  m_Size: {x: 1, y: 1.9}
   m_Direction: 0
 --- !u!114 &1658111801873414903
 MonoBehaviour:
@@ -606,7 +606,7 @@ MonoBehaviour:
   _wallLayer:
     serializedVersion: 2
     m_Bits: 64
-  _jumpForce: 20
+  _jumpForce: 25
   _dashDistance: 30
   _dashCooldown: 0
   _dashAirTimeSet: 0.25
@@ -615,8 +615,8 @@ MonoBehaviour:
   _slideTime: 1
   _slideDistance: 30
   _isSprinting: 0
-  _jumpStrafeDrag: 10
-  _jumpStrafeSpeedUp: 1.2
+  _jumpStrafeDrag: 7
+  _jumpStrafeSpeedUp: 0.8
   _inAirLeft: 0
 --- !u!95 &6548465852649366081
 Animator:
