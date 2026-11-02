@@ -153,22 +153,26 @@ public class PlayerMovementScript : MonoBehaviour
             }
             else if (_isSprinting)
             {
-                if (move.x < 0f)
+                if (CheckForGround())
                 {
-                    _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
-                    _playerRB.AddForce(Vector2.left * _slideDistance, ForceMode2D.Impulse);
-                    _isSliding = true;
-                    _isCrouched = true;
-                    _playerCollider.size = new Vector2(0.8f, 0.8f);
+                    if (move.x < 0f)
+                    {
+                        _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
+                        _playerRB.AddForce(Vector2.left * _slideDistance, ForceMode2D.Impulse);
+                        _isSliding = true;
+                        _isCrouched = true;
+                        _playerCollider.size = new Vector2(0.8f, 0.8f);
+                    }
+                    else if (move.x > 0f)
+                    {
+                        _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
+                        _playerRB.AddForce(Vector2.right * _slideDistance, ForceMode2D.Impulse);
+                        _isSliding = true;
+                        _isCrouched = true;
+                        _playerCollider.size = new Vector2(0.8f, 0.8f);
+                    }
                 }
-                else if (move.x > 0f)
-                {
-                    _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
-                    _playerRB.AddForce(Vector2.right * _slideDistance, ForceMode2D.Impulse);
-                    _isSliding = true;
-                    _isCrouched = true;
-                    _playerCollider.size = new Vector2(0.8f, 0.8f);
-                }
+
             }
         }
      if (context.canceled)

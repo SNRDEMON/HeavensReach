@@ -6675,7 +6675,7 @@ MonoBehaviour:
   _slideTime: 1
   _slideDistance: 30
   _isSprinting: 0
-  _jumpStrafeDrag: 10
+  _jumpStrafeDrag: 7
   _jumpStrafeSpeedUp: 1.2
   _inAirLeft: 0
 --- !u!114 &2120871520
