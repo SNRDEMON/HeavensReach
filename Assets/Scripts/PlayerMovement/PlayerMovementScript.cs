@@ -44,7 +44,7 @@ public class PlayerMovementScript : MonoBehaviour
 
     [Header("Slide stuff")]
     [SerializeField] private float _slideTime = 1f;
-
+    [SerializeField] private float _slideDistance = 6f;
 
     [Header("Sprint stuff")]
     [SerializeField] private bool _isSprinting;
@@ -143,7 +143,7 @@ public class PlayerMovementScript : MonoBehaviour
 
                 if (_isCrouched == false)
                 {
-
+                    _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
                     _speed = _crouchSpeed;
                     _isCrouched = true;
                     _playerCollider.size = new Vector2(0.8f, 0.8f);
@@ -155,14 +155,16 @@ public class PlayerMovementScript : MonoBehaviour
             {
                 if (move.x < 0f)
                 {
-                    _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
+                    _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
+                    _playerRB.AddForce(Vector2.left * _slideDistance, ForceMode2D.Impulse);
                     _isSliding = true;
                     _isCrouched = true;
                     _playerCollider.size = new Vector2(0.8f, 0.8f);
                 }
                 else if (move.x > 0f)
                 {
-                    _playerRB.AddForce(Vector2.right * _dashDistance, ForceMode2D.Impulse);
+                    _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
+                    _playerRB.AddForce(Vector2.right * _slideDistance, ForceMode2D.Impulse);
                     _isSliding = true;
                     _isCrouched = true;
                     _playerCollider.size = new Vector2(0.8f, 0.8f);
@@ -174,8 +176,8 @@ public class PlayerMovementScript : MonoBehaviour
         Debug.Log("UncrouchedScriptRun");
          if (_isCrouched == true && _isUnableToUncrouch == false)
         {
-
-                    _speed = _walkSpeed;
+                    _playerRB.MovePosition(_playerRB.position + Vector2.up * .8f);
+                   _speed = _walkSpeed;
                     _isCrouched = false;
                     _isSliding = false;
                     _playerCollider.size = new Vector2(1, 2);
