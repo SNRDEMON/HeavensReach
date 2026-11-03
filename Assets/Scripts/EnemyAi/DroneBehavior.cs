@@ -24,6 +24,13 @@ public class DroneBehavior : EnemyBehavior
     {
         patrolLoopIndex = 0;
     }
+    void Awake()
+    {
+        myAgent = GetComponent<NavMeshAgent>();
+
+        myAgent.updateRotation = false;
+        myAgent.updateUpAxis = false;
+    }
 
     private void Update()
     {
