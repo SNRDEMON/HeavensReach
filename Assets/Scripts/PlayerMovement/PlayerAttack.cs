@@ -18,6 +18,8 @@ public class PlayerAttack : MonoBehaviour
     {
         _vertMove = context.ReadValue<Vector2>();
     }
-
-//    public void
+    public void OnAttack(InputAction.CallbackContext context)
+    {
+        
+    }
 }

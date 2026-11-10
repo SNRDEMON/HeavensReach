@@ -11,9 +11,11 @@ public class PlayerMovementScript : MonoBehaviour
     private float _crouchSpeed = 2.5f;
     private float _walkSpeed = 5f;
     private bool _isCrouched = false;
+   
     [Header("Wall checking Stuff")]
     [SerializeField] private float _vertWallCheckDistance = 1f;
     [SerializeField] private float _horWallCheckDistance = 1f;
+
     //temp variable
 
     //probably move this away from being layers later but idk it works for walls
@@ -25,8 +27,14 @@ public class PlayerMovementScript : MonoBehaviour
     private bool _isAttachedToWall = false;
     private Vector2 move;
     private Vector2 _vertMove;
+
+    //Some Stuff for the sprites
+    [Header("Manual Setup For Sprites")]
     private Rigidbody2D _playerRB;
     private CapsuleCollider2D _playerCollider;
+    private SpriteRenderer _playerSpriteRenderer;
+    [SerializeField] private GameObject _wingObject;
+    [SerializeField] private SpriteRenderer _wingSpriteRenderer;
     //probably a better way to do this with like a for loop or coroutine but idk I'm lazy
     //yeah rereading this half this shit needs to be on coroutines instead of if statements I just didn't want to impliment them
     private float _jumpCooldown = 0f;
@@ -56,6 +64,7 @@ public class PlayerMovementScript : MonoBehaviour
     {
         _playerRB = GetComponent<Rigidbody2D>();
         _playerCollider = GetComponent<CapsuleCollider2D>();
+        _playerSpriteRenderer = GetComponent<SpriteRenderer>();
     }
     private bool _xMoveButtonHeldDown;
     public void OnMove(InputAction.CallbackContext context)
@@ -146,6 +155,8 @@ public class PlayerMovementScript : MonoBehaviour
                 //put a crouch function here
                 Debug.Log("CrouchStarted");
             }
+
+            //put a cooldown and duration for these
             else if (_isSprinting)
             {
                 if (CheckForGround())
@@ -403,6 +414,23 @@ public class PlayerMovementScript : MonoBehaviour
         }
         if (!_isDashing && !_isSliding)
         {
+            if (move.x > 0f)
+            {
+                _playerSpriteRenderer.flipX = false;
+                _wingSpriteRenderer.flipX = false;
+
+                _wingObject.transform.localPosition = new Vector3 (-0.868f, 0,0);
+                
+            }
+
+            else if (move.x < 0f)
+            {
+                _playerSpriteRenderer.flipX = true;
+                _wingSpriteRenderer.flipX = true;
+
+                _wingObject.transform.localPosition = new Vector3(0.868f, 0, 0);
+            }
+
             if (_isGrounded || _jumpMovementGraceActive || _isAttachedToWall)
             {
                 float velocityX = move.x * _speed;

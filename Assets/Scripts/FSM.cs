@@ -9,6 +9,7 @@ public class FSM : MonoBehaviour
    [SerializeField] private bool isCrouched = false;
     private Animator _anim;
     private Animator _wingAnim;
+    [SerializeField] private PlayerMovementScript _playerMovementScript;
 
     private void Start()
     {
