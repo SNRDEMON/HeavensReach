@@ -351,6 +351,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FSM
   isCrouched: 0
+  _playerMovementScript: {fileID: 200928125}
 --- !u!95 &200928121
 Animator:
   serializedVersion: 7
@@ -666,6 +667,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 767d2c44556cf1244b926bf0601968c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementScript
+  _isCrouched: 0
+  _isWalking: 0
   _vertWallCheckDistance: 1.05
   _horWallCheckDistance: 0.55
   _wallLayer:
@@ -5377,7 +5380,7 @@ Transform:
   m_GameObject: {fileID: 683781109}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8.55, y: -0.6736734, z: -10}
+  m_LocalPosition: {x: -10.28, y: -0.55367327, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7150,7 +7153,7 @@ MonoBehaviour:
   m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
-    TrackingTarget: {fileID: 0}
+    TrackingTarget: {fileID: 200928118}
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
@@ -7182,7 +7185,7 @@ Transform:
   m_GameObject: {fileID: 1576068290}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -8.55, y: -0.6736734, z: -10}
+  m_LocalPosition: {x: -10.28, y: -0.55367327, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -19,7 +19,7 @@ public class FSM : MonoBehaviour
 
     public void OnMovePlay(InputAction.CallbackContext context)
     {
-        if (context.started)
+     /*   if (context.started)
         {
             if (isCrouched == true)
             {
@@ -39,16 +39,36 @@ public class FSM : MonoBehaviour
             else
                 _anim.Play("Idle");
             _wingAnim.Play("WingFlap");
-        }
+        } */
     }
+    public void Update()
+    {
+        if (_playerMovementScript._isWalking && !_playerMovementScript._isCrouched)
+        {
+            _anim.Play("Walk");
+        }
+        else if (!_playerMovementScript._isWalking && !_playerMovementScript._isCrouched)
+        {
+            _anim.Play("Idle");
+        }
 
+        else if (_playerMovementScript._isCrouched && _playerMovementScript._isWalking)
+        {
+            _anim.Play("Crouch");
+        }
+        else if (_playerMovementScript._isCrouched && !_playerMovementScript._isWalking)
+        {
+            _anim.Play("CrouchIdle");
+        }
+
+    }
     public void OnCrouchPlay(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
             //Play crouch down 
           
-            isCrouched = !isCrouched;
+          //  isCrouched = !isCrouched;
         }
        
     }
