@@ -124,7 +124,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: base
+      name: 1
       rect:
         serializedVersion: 2
         x: 0
@@ -146,11 +146,11 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: contact back
+      name: 5
       rect:
         serializedVersion: 2
         x: 768
-        y: 768
+        y: 771
         width: 768
         height: 768
       alignment: 0
@@ -168,7 +168,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: front up
+      name: 2
       rect:
         serializedVersion: 2
         x: 768
@@ -190,7 +190,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pass front
+      name: 3
       rect:
         serializedVersion: 2
         x: 1536
@@ -212,7 +212,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Untitled_4
+      name: 4
       rect:
         serializedVersion: 2
         x: 0
@@ -234,7 +234,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: back up
+      name: 6
       rect:
         serializedVersion: 2
         x: 1536
@@ -256,7 +256,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Untitled_6
+      name: 7
       rect:
         serializedVersion: 2
         x: 0
@@ -278,7 +278,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Untitled_7
+      name: 8
       rect:
         serializedVersion: 2
         x: 768
@@ -300,7 +300,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: contact front
+      name: 9
       rect:
         serializedVersion: 2
         x: 1536
@@ -335,15 +335,15 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Untitled_4: 3497017549717050266
-      Untitled_6: 5803896622747376079
-      Untitled_7: 7150621830380197041
-      back up: -1473889284650361304
-      base: 133982719826790466
-      contact back: 8110719193379804542
-      contact front: 4519514634583505331
-      front up: 8893786113882650503
-      pass front: -2990250524230820611
+      1: 133982719826790466
+      2: 8893786113882650503
+      3: -2990250524230820611
+      4: 3497017549717050266
+      5: 8110719193379804542
+      6: -1473889284650361304
+      7: 5803896622747376079
+      8: 7150621830380197041
+      9: 4519514634583505331
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
