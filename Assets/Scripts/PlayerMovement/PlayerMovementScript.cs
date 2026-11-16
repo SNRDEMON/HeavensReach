@@ -16,7 +16,7 @@ public class PlayerMovementScript : MonoBehaviour
     [Header("Wall checking Stuff")]
     [SerializeField] private float _vertWallCheckDistance = 1f;
     [SerializeField] private float _horWallCheckDistance = 1f;
-
+    [SerializeField] private Rigidbody2D.SlideMovement _slideRigidbody;
     //temp variable
 
     //probably move this away from being layers later but idk it works for walls
@@ -258,7 +258,8 @@ public class PlayerMovementScript : MonoBehaviour
 
             if (hit.collider != null)
             {
-
+                if (hit.collider.TryGetComponent<Slope>(out _))
+                    continue;
                 if (i == 0)
                 {
                     centerhit = true;
@@ -270,6 +271,7 @@ public class PlayerMovementScript : MonoBehaviour
                             _isAttachedToWall = true;
                         }
                     }
+                    
                 }
                 if (i == 1)
                 {
@@ -359,10 +361,12 @@ public class PlayerMovementScript : MonoBehaviour
         for (int i = 0; i < BottomRayOrigins.Length; i++)
         {
             Vector2 v = BottomRayOrigins[i];
-            RaycastHit2D hit = Physics2D.Raycast(v, Vector2.down, _horWallCheckDistance, _wallLayer);
-            Debug.DrawRay(v, Vector2.down * _horWallCheckDistance, Color.green);
+            RaycastHit2D hit = Physics2D.Raycast(v, Vector2.down, _vertWallCheckDistance, _wallLayer);
+            Debug.DrawRay(v, Vector2.down * _vertWallCheckDistance, Color.green);
             if (hit.collider != null)
             {
+                if (hit.collider.TryGetComponent<Slope>(out _))
+                    continue;
                 if (i == 0)
                 {
                     lefthit = true;
@@ -400,12 +404,60 @@ public class PlayerMovementScript : MonoBehaviour
     {
         _playerRB.gravityScale = 0f;
     }
+    private bool CheckForSlope(out Vector2 groundNormal)
+    {
+        Bounds bounds = GetComponent<Collider2D>().bounds;
 
+        Vector2 origin = new Vector2(
+            bounds.center.x,
+            bounds.min.y
+        );
+
+        RaycastHit2D hit = Physics2D.Raycast(
+            origin,
+            Vector2.down,
+            _vertWallCheckDistance,
+            _wallLayer
+        );
+
+        Debug.DrawRay(
+            origin,
+            Vector2.down * _vertWallCheckDistance,
+            Color.yellow
+        );
+
+        if (hit.collider != null)
+        {
+            groundNormal = hit.normal;
+
+            float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+
+            return slopeAngle > 0.5f;
+        }
+
+        groundNormal = Vector2.up;
+        return false;
+    }
     //shove more of the update stuff in here maybe
     private void MovePlayerWithPhysicsHorizontal(float velocityX)
     {
-        _playerRB.linearVelocity = new Vector2(velocityX, _playerRB.linearVelocity.y);
-        _isWalking = true;
+        if (!CheckForWalls(move.x))
+        {
+            _playerRB.linearVelocity = new Vector2(
+                velocityX,
+                _playerRB.linearVelocity.y
+            );
+        }
+        else if (CheckForGround())
+        {
+            float _overwriteSlide = move.x * _speed;
+
+            Vector2 _slopeMovement = new Vector2(_overwriteSlide, _playerRB.linearVelocityY);
+
+            _playerRB.Slide(_slopeMovement,Time.deltaTime,_slideRigidbody);
+        }
+
+        _isWalking = Mathf.Abs(velocityX) > 0.01f;
     }
     //I could probably move all these raycasts to a function that returns them I think instead of this (Update, working on it)
     private void Update()
