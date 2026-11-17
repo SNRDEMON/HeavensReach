@@ -160,7 +160,7 @@ public class PlayerMovementScript : MonoBehaviour
             //put a cooldown and duration for these
             else if (_isSprinting)
             {
-                if (CheckForGround())
+                if (CheckForGround() == 1)
                 {
                     if (move.x < 0f)
                     {
@@ -216,9 +216,11 @@ public class PlayerMovementScript : MonoBehaviour
     {
         if (_isGrounded == true && (_jumpCooldown <= 0))
         {
-            _playerRB.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
+
             _jumpCooldown = 1f;
             _isGrounded = false;
+
+            _playerRB.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
             _jumpMovementGraceActive = true;
             _jumpMovementGrace = _jumpMovementGraceDuration;
 
@@ -265,7 +267,7 @@ public class PlayerMovementScript : MonoBehaviour
                     centerhit = true;
                     if (hit.collider.TryGetComponent(out StickyWall stick))
                     {
-                        if (!CheckForGround())
+                        if (CheckForGround() == 0)
                         {
 
                             _isAttachedToWall = true;
@@ -291,7 +293,7 @@ public class PlayerMovementScript : MonoBehaviour
         {
             if (_ledgeNudgeTimer <= 0f)
             {
-                _playerRB.position += Vector2.up * _ledgeNudgeAmount;
+               _playerRB.position += Vector2.up * _ledgeNudgeAmount;
                 _ledgeNudgeTimer = _ledgeNudgeCooldown;
             }
             return false;
@@ -349,7 +351,7 @@ public class PlayerMovementScript : MonoBehaviour
     }
     //making the ground check also be an array too, but it's less important
     private Vector2[] BottomRayOrigins = new Vector2[3];
-    private bool CheckForGround()
+    private int CheckForGround()
     {
         Bounds bounds = GetComponent<Collider2D>().bounds;
         bool lefthit = false;
@@ -366,7 +368,7 @@ public class PlayerMovementScript : MonoBehaviour
             if (hit.collider != null)
             {
                 if (hit.collider.TryGetComponent<Slope>(out _))
-                    continue;
+                    return 2;
                 if (i == 0)
                 {
                     lefthit = true;
@@ -386,9 +388,9 @@ public class PlayerMovementScript : MonoBehaviour
         if (centerhit || lefthit || righthit)
         {
 
-            return true;
+            return 1;
         }
-        return false;
+        return 0;
 
     }
     public bool _inAirLeft = false; //reset to private later
@@ -441,23 +443,33 @@ public class PlayerMovementScript : MonoBehaviour
     //shove more of the update stuff in here maybe
     private void MovePlayerWithPhysicsHorizontal(float velocityX)
     {
-        if (!CheckForWalls(move.x))
+        //REMOVE THESE COMMENTS BEFORE YOU SUBMIT GIRL
+        if (!CheckForWalls(move.x) && (CheckForGround() == 1 || CheckForGround() == 0) )
         {
             _playerRB.linearVelocity = new Vector2(
                 velocityX,
                 _playerRB.linearVelocity.y
+
             );
-        }
-        else if (CheckForGround())
+            _isWalking = Mathf.Abs(velocityX) > 0.01f;
+        } 
+     else if (CheckForGround() == 2)
         {
+            if (_isGrounded)
+            {
+                _playerRB.linearVelocity = Vector2.zero;
+            }
+            
             float _overwriteSlide = move.x * _speed;
 
             Vector2 _slopeMovement = new Vector2(_overwriteSlide, _playerRB.linearVelocityY);
 
             _playerRB.Slide(_slopeMovement,Time.deltaTime,_slideRigidbody);
+            _isWalking = Mathf.Abs(velocityX) > 0.01f;
         }
 
-        _isWalking = Mathf.Abs(velocityX) > 0.01f;
+        
+
     }
     //I could probably move all these raycasts to a function that returns them I think instead of this (Update, working on it)
     private void Update()
@@ -573,7 +585,7 @@ public class PlayerMovementScript : MonoBehaviour
             }
 
             CheckForGround();
-            if (CheckForGround() == true)
+            if (CheckForGround() == 1)
             {
                 if (!_jumpMovementGraceActive)
                 {
@@ -587,7 +599,7 @@ public class PlayerMovementScript : MonoBehaviour
                 }
                 // Debug.Log("check for ground array working");
             }
-            else if (CheckForGround() == false)
+            else if (CheckForGround() == 0)
             {
                 if (_isGrounded == true)
                 {
@@ -597,6 +609,26 @@ public class PlayerMovementScript : MonoBehaviour
                 // Debug.Log("This is the false return for jump");
             }
             if (_dashAirTimeLeft <= 0)
+            {
+                if (CheckForGround() == 2)
+                {
+//                    _playerRB.gravityScale = 1f;
+                }
+            }
+            if (CheckForGround() == 2)
+            {
+                if (_isGrounded == false && (_jumpCooldown <= 0))
+                {
+                    _isGrounded = true;
+                }
+
+                if (_isGrounded)
+                {
+                    _playerRB.gravityScale = 0f;
+                }
+
+            }
+            else if (CheckForGround() != 2)
             {
                 _playerRB.gravityScale = 1f;
             }
