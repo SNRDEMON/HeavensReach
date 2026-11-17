@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class EnemyVision : MonoBehaviour
 {
@@ -10,6 +11,9 @@ public class EnemyVision : MonoBehaviour
     [SerializeField,Min(3)] private int ViewRayDensity;
     [SerializeField] private bool mirrorX;
 
+    private float degToRad = MathF.PI / 180.0f;
+    private float radToDeg = 180.0f / MathF.PI;
+
     public void Flip()
     {
         mirrorX = !mirrorX;
@@ -17,12 +21,26 @@ public class EnemyVision : MonoBehaviour
 
     public void PointView(float angle)
     {
-        viewAngle = angle / 60.0f;
+        viewAngle = angle * degToRad;
     }
 
     public void PointView(Vector2 target)
     {
-        viewAngle = Vector2.Angle(transform.position, target);
+        Vector2 dif = target - (Vector2)transform.position;
+        if (dif.magnitude < 0.01f) return;
+        float baseAngle = Vector2.Angle(Vector2.right, dif);
+        if (target.y < transform.position.y) baseAngle *= -1.0f;
+        viewAngle = baseAngle * degToRad;
+    }
+
+    public void PointView(Vector2 target, float damper)
+    {
+        Vector2 dif = target - (Vector2)transform.position;
+        if (dif.magnitude < 0.01f) return;
+        float baseAngle = Vector2.Angle(Vector2.right, dif);
+        if (target.y < transform.position.y) baseAngle *= -1.0f;
+        baseAngle *= degToRad;
+        viewAngle = viewAngle + ((baseAngle - viewAngle) * damper);
     }
 
     public bool CanSeePlayer(out Vector2 spot)
@@ -34,7 +52,7 @@ public class EnemyVision : MonoBehaviour
             LayerMask mask = 6;
             RaycastHit2D hit = Physics2D.Raycast(rayCone[i].origin, rayCone[i].direction,ViewDistance);
             if (hit.collider == null) continue;
-
+            //Debug.Log(hit.collider.name);
             if (hit.collider.gameObject.tag == "Player")
             {
                 spot = hit.collider.transform.position;

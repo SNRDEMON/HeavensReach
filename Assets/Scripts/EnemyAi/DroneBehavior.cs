@@ -11,9 +11,13 @@ public class DroneBehavior : EnemyBehavior
     [SerializeField] private List<Vector2> PatrolPath;
     [SerializeField] private bool cyclicalPatrol;
     [SerializeField] private float patrolSpeed;
+    [SerializeField] private float chaseSpeed;
     [SerializeField] private NavMeshSurface myMesh;
     [SerializeField] private NavMeshAgent myAgent;
     [SerializeField] private EnemyVision eyes;
+
+    [SerializeField] private float mySuspicionTotal = 0f;
+    [SerializeField] private float suspicionMaximum;
 
     private PatrolState curState = PatrolState.Patrol;
     private int patrolLoopIndex;
@@ -44,6 +48,13 @@ public class DroneBehavior : EnemyBehavior
             case PatrolState.Suspicion:
                 Suspicion();
                 break;
+            case PatrolState.Chase:
+                Chase();
+                break;
+            case PatrolState.Tracking:
+                break;
+            case PatrolState.Disengage:
+                break;
         }
     }
 
@@ -73,11 +84,41 @@ public class DroneBehavior : EnemyBehavior
             myAgent.SetDestination(PatrolPath[patrolLoopIndex]);
         }
 
-        if (SeePlayer()) curState = PatrolState.Suspicion;
+        if (SeePlayer())
+        {
+            curState = PatrolState.Suspicion;
+            mySuspicionTotal = 3.0f;
+        }
 
     }
 
     private void Suspicion()
+    {
+        if (SeePlayer())
+        {
+            mySuspicionTotal += Time.deltaTime;
+            myAgent.SetDestination(lastKnownPlayerLocation);
+        }
+        else
+        {
+            mySuspicionTotal -= Time.deltaTime;
+        }
+        float suspicionPercent = mySuspicionTotal / suspicionMaximum;
+        if (suspicionPercent > 1.0f) suspicionPercent = 1.0f;
+        myAgent.speed = patrolSpeed + ((chaseSpeed - patrolSpeed) * suspicionPercent);
+        eyes.PointView(lastKnownPlayerLocation,suspicionPercent);
+
+
+        if (mySuspicionTotal <= 0)
+        {
+            curState = PatrolState.Patrol;
+            mySuspicionTotal = 0;
+        }
+        else if (mySuspicionTotal >= suspicionMaximum) curState = PatrolState.Chase;
+                
+    }
+
+    private void Chase()
     {
         myAgent.SetDestination(lastKnownPlayerLocation);
         eyes.PointView(lastKnownPlayerLocation);
