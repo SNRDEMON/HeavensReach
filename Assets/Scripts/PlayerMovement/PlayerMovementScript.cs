@@ -407,41 +407,7 @@ public class PlayerMovementScript : MonoBehaviour
     {
         _playerRB.gravityScale = 0f;
     }
-    private bool CheckForSlope(out Vector2 groundNormal)
-    {
-        Bounds bounds = GetComponent<Collider2D>().bounds;
-
-        Vector2 origin = new Vector2(
-            bounds.center.x,
-            bounds.min.y
-        );
-
-        RaycastHit2D hit = Physics2D.Raycast(
-            origin,
-            Vector2.down,
-            _vertWallCheckDistance,
-            _wallLayer
-        );
-
-        Debug.DrawRay(
-            origin,
-            Vector2.down * _vertWallCheckDistance,
-            Color.yellow
-        );
-
-        if (hit.collider != null)
-        {
-            groundNormal = hit.normal;
-
-            float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-
-            return slopeAngle > 0.5f;
-        }
-
-        groundNormal = Vector2.up;
-        return false;
-    }
-    //shove more of the update stuff in here maybe
+    
     private void MovePlayerWithPhysicsHorizontal(float velocityX)
     {
         //REMOVE THESE COMMENTS BEFORE YOU SUBMIT GIRL
