@@ -99,8 +99,8 @@ public class PlayerMovementScript : MonoBehaviour
     }
     public void OnDash(InputAction.CallbackContext context)
     {
-         if (CheckForGround() != 2)
-        {
+       
+        
             if (_dashCooldown <= 0f)
             {
                 if (!_isCrouched)
@@ -114,8 +114,8 @@ public class PlayerMovementScript : MonoBehaviour
                         _dashCooldown = 1f;
                         _dashAirTimeLeft = _dashAirTimeSet;
                         _isDashing = true;
-                       // _playerRB.gravityScale = 0.1f;
-
+                        // _playerRB.gravityScale = 0.1f;
+                        _isGrounded = false;
                         Debug.Log("Tried To dash1");
                     }
                     else if (move.x > 0f)
@@ -127,14 +127,15 @@ public class PlayerMovementScript : MonoBehaviour
                         _dashCooldown = 1f;
                         _dashAirTimeLeft = _dashAirTimeSet;
                         _isDashing = true;
-                      //  _playerRB.gravityScale = 0.1f;
-
+                        //  _playerRB.gravityScale = 0.1f;
+                        //change to not being is grounded
+                        _isGrounded = false;
                         Debug.Log("Tried To dash2");
                     }
                 }
                 Debug.Log("Tried To dash3");
             }
-        }
+        
     }
     //is a mess work on this
     private bool _isSliding = false;
@@ -159,14 +160,14 @@ public class PlayerMovementScript : MonoBehaviour
             //put a cooldown and duration for these
             else if (_isSprinting)
             {
-                if (CheckForGround() == 1)
+                if (CheckForGround() == 1 || CheckForGround() == 2)
                 {
                     //start a coroutine here to make you stand up
                     if (move.x < 0f)
                     {
                         _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
                         _playerRB.AddForce(Vector2.left * _slideDistance, ForceMode2D.Impulse);
-                        _isSliding = true;
+                       // _isSliding = true;
                         _isCrouched = true;
                         _playerCollider.size = new Vector2(0.8f, 0.8f);
                     }
@@ -174,7 +175,7 @@ public class PlayerMovementScript : MonoBehaviour
                     {
                         _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
                         _playerRB.AddForce(Vector2.right * _slideDistance, ForceMode2D.Impulse);
-                        _isSliding = true;
+                       // _isSliding = true;
                         _isCrouched = true;
                         _playerCollider.size = new Vector2(0.8f, 0.8f);
                     }
@@ -190,7 +191,7 @@ public class PlayerMovementScript : MonoBehaviour
                 _playerRB.MovePosition(_playerRB.position + Vector2.up * .8f);
                 _speed = _walkSpeed;
                 _isCrouched = false;
-                _isSliding = false;
+              //  _isSliding = false;
                 _playerCollider.size = new Vector2(1, 1.9f);
 
             }
@@ -474,6 +475,12 @@ public class PlayerMovementScript : MonoBehaviour
     //I could probably move all these raycasts to a function that returns them I think instead of this (Update, working on it)
     private void Update()
     {
+        _dashCooldown -= Time.deltaTime;
+        _jumpCooldown -= Time.deltaTime;
+        _dashAirTimeLeft -= Time.deltaTime;
+        _ledgeNudgeTimer -= Time.deltaTime;
+
+        _jumpMovementGrace -= Time.deltaTime;
         if (_dashAirTimeLeft <= 0f)
         {
             _isDashing = false;
@@ -650,11 +657,7 @@ public class PlayerMovementScript : MonoBehaviour
             }
 
             //bad way to do a cooldown but this is here because you could jump twice before you could get off the ground so you'll want to replace it with a coroutine probably
-            _jumpCooldown -= Time.deltaTime;
-            _dashAirTimeLeft -= Time.deltaTime;
-            _ledgeNudgeTimer -= Time.deltaTime;
-            _dashCooldown -= Time.deltaTime;
-            _jumpMovementGrace -= Time.deltaTime;
+
         }
         //some code from my old game
     }
