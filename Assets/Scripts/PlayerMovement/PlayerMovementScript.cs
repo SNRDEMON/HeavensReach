@@ -99,43 +99,42 @@ public class PlayerMovementScript : MonoBehaviour
     }
     public void OnDash(InputAction.CallbackContext context)
     {
-        if (_dashCooldown <= 0f)
+         if (CheckForGround() != 2)
         {
-            if (!_isCrouched)
+            if (_dashCooldown <= 0f)
             {
-                if (move.x < 0f)
+                if (!_isCrouched)
                 {
-                    _playerRB.linearVelocityX = 0f;
-                    _playerRB.linearVelocityY = 0f;
-                    KeepAirDirection();
-                    _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
-                    _dashCooldown = 1f;
-                    _dashAirTimeLeft = _dashAirTimeSet;
-                    _isDashing = true;
-                    _playerRB.gravityScale = 0.1f;
+                    if (move.x < 0f)
+                    {
+                        _playerRB.linearVelocityX = 0f;
+                        _playerRB.linearVelocityY = 0f;
+                        KeepAirDirection();
+                        _playerRB.AddForce(Vector2.left * _dashDistance, ForceMode2D.Impulse);
+                        _dashCooldown = 1f;
+                        _dashAirTimeLeft = _dashAirTimeSet;
+                        _isDashing = true;
+                       // _playerRB.gravityScale = 0.1f;
 
-                    Debug.Log("Tried To dash1");
-                }
-                else if (move.x > 0f)
-                {
-                    _playerRB.linearVelocityX = 0f;
-                    _playerRB.linearVelocityY = 0f;
-                    KeepAirDirection();
-                    _playerRB.AddForce(Vector2.right * _dashDistance, ForceMode2D.Impulse);
-                    _dashCooldown = 1f;
-                    _dashAirTimeLeft = _dashAirTimeSet;
-                    _isDashing = true;
-                    _playerRB.gravityScale = 0.1f;
+                        Debug.Log("Tried To dash1");
+                    }
+                    else if (move.x > 0f)
+                    {
+                        _playerRB.linearVelocityX = 0f;
+                        _playerRB.linearVelocityY = 0f;
+                        KeepAirDirection();
+                        _playerRB.AddForce(Vector2.right * _dashDistance, ForceMode2D.Impulse);
+                        _dashCooldown = 1f;
+                        _dashAirTimeLeft = _dashAirTimeSet;
+                        _isDashing = true;
+                      //  _playerRB.gravityScale = 0.1f;
 
-                    Debug.Log("Tried To dash2");
+                        Debug.Log("Tried To dash2");
+                    }
                 }
+                Debug.Log("Tried To dash3");
             }
-            Debug.Log("Tried To dash3");
         }
-
-
-
-
     }
     //is a mess work on this
     private bool _isSliding = false;
@@ -162,6 +161,7 @@ public class PlayerMovementScript : MonoBehaviour
             {
                 if (CheckForGround() == 1)
                 {
+                    //start a coroutine here to make you stand up
                     if (move.x < 0f)
                     {
                         _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
@@ -465,7 +465,7 @@ public class PlayerMovementScript : MonoBehaviour
             Vector2 _slopeMovement = new Vector2(_overwriteSlide, _playerRB.linearVelocityY);
 
             _playerRB.Slide(_slopeMovement,Time.deltaTime,_slideRigidbody);
-            _isWalking = Mathf.Abs(velocityX) > 0.01f;
+            _isWalking = true;
         }
 
         
@@ -563,7 +563,18 @@ public class PlayerMovementScript : MonoBehaviour
             // tolerance for stopping walking animation
             if (_playerRB.linearVelocityX <= 0.01f && _playerRB.linearVelocityX >= -0.1f)
             {
-                _isWalking = false;
+                if (CheckForGround() != 2)
+                {
+                    _isWalking = false;
+                }
+
+            }
+            if (move.x == 0f)
+            {
+                if (CheckForGround() == 2)
+                {
+                    _isWalking = false;
+                }
             }
 
 

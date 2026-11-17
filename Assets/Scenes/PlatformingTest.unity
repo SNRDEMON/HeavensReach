@@ -669,7 +669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementScript
   _isCrouched: 0
   _isWalking: 0
-  _vertWallCheckDistance: 1.05
+  _vertWallCheckDistance: 0.25
   _horWallCheckDistance: 0.55
   _slideRigidbody:
     <maxIterations>k__BackingField: 3
