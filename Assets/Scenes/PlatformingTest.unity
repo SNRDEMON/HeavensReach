@@ -699,11 +699,13 @@ MonoBehaviour:
   _dashAirTimeSet: 0.25
   _ledgeNudgeAmount: 0.05
   _ledgeNudgeCooldown: 0.1
-  _slideTime: 1
-  _slideDistance: 30
+  _slideTime: 0.5
+  _slideDistance: 5
+  _crouchOffsetDistance: 0
   _isSprinting: 0
   _jumpStrafeDrag: 7
   _jumpStrafeSpeedUp: 0.8
+  _isSliding: 0
   _inAirLeft: 0
 --- !u!212 &200928126
 SpriteRenderer:

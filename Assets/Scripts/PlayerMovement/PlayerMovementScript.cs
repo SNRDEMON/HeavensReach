@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -54,7 +55,9 @@ public class PlayerMovementScript : MonoBehaviour
     [Header("Slide stuff")]
     [SerializeField] private float _slideTime = 1f;
     [SerializeField] private float _slideDistance = 6f;
-
+    private float _slideTimeLeft;
+    private Coroutine SlideCoro;
+    [SerializeField] private float _crouchOffsetDistance = 0.8f;
     [Header("Sprint stuff")]
     [SerializeField] private bool _isSprinting;
 
@@ -138,7 +141,7 @@ public class PlayerMovementScript : MonoBehaviour
         
     }
     //is a mess work on this
-    private bool _isSliding = false;
+    [SerializeField] private bool _isSliding = false;
     public void OnCrouch(InputAction.CallbackContext context)
     {
         if (context.started)
@@ -148,7 +151,7 @@ public class PlayerMovementScript : MonoBehaviour
 
                 if (_isCrouched == false)
                 {
-                    _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
+                    _playerRB.MovePosition(_playerRB.position + Vector2.down * _crouchOffsetDistance);
                     _speed = _crouchSpeed;
                     _isCrouched = true;
                     _playerCollider.size = new Vector2(0.8f, 0.8f);
@@ -163,20 +166,20 @@ public class PlayerMovementScript : MonoBehaviour
                 if (CheckForGround() == 1 || CheckForGround() == 2)
                 {
                     //start a coroutine here to make you stand up
-                    if (move.x < 0f)
+                    if (move.x < 0f || move.x > 0f)
                     {
-                        _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
-                        _playerRB.AddForce(Vector2.left * _slideDistance, ForceMode2D.Impulse);
-                       // _isSliding = true;
+                        //_playerRB.MovePosition(_playerRB.position + Vector2.down * _crouchOffsetDistance);
+                      
+                        _isSliding = true;
                         _isCrouched = true;
-                        _playerCollider.size = new Vector2(0.8f, 0.8f);
-                    }
-                    else if (move.x > 0f)
-                    {
-                        _playerRB.MovePosition(_playerRB.position + Vector2.down * .7f);
-                        _playerRB.AddForce(Vector2.right * _slideDistance, ForceMode2D.Impulse);
-                       // _isSliding = true;
-                        _isCrouched = true;
+                        _slideTimeLeft = _slideTime;
+
+                        if (SlideCoro != null)
+                        {
+                            StopCoroutine(SlideCoro);
+                        }
+                        SlideCoro = StartCoroutine(SlideCoroutine(2f, Mathf.Sign(move.x)));
+                        _speed = _crouchSpeed;
                         _playerCollider.size = new Vector2(0.8f, 0.8f);
                     }
                 }
@@ -188,12 +191,16 @@ public class PlayerMovementScript : MonoBehaviour
             Debug.Log("UncrouchedScriptRun");
             if (_isCrouched == true && _isUnableToUncrouch == false)
             {
+                if (SlideCoro != null)
+                {
+                    StopCoroutine(SlideCoro);
+                }
                 _playerRB.MovePosition(_playerRB.position + Vector2.up * .8f);
                 _speed = _walkSpeed;
                 _isCrouched = false;
-              //  _isSliding = false;
+                _isSliding = false;
                 _playerCollider.size = new Vector2(1, 1.9f);
-
+                
             }
 
             //put uncrouch functions here
@@ -204,6 +211,26 @@ public class PlayerMovementScript : MonoBehaviour
 
 
 
+    }
+    private IEnumerator SlideCoroutine(float duration, float direction)
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            float slideMovement = direction * _slideDistance;
+            Vector2 slideVelocity = new Vector2(slideMovement, _playerRB.linearVelocityY);
+
+            _playerRB.Slide(slideVelocity, Time.deltaTime, _slideRigidbody);
+
+            elapsedTime += Time.deltaTime;
+            
+            yield return new WaitForFixedUpdate();
+
+            _playerRB.gravityScale = 0f;
+        }
+        _playerRB.gravityScale = 1f;
+        _isSliding = false;
     }
     //Note to self, don't keep these as hardcoded make them variables later as I clean this up
 
@@ -410,30 +437,34 @@ public class PlayerMovementScript : MonoBehaviour
     
     private void MovePlayerWithPhysicsHorizontal(float velocityX)
     {
-        //REMOVE THESE COMMENTS BEFORE YOU SUBMIT GIRL
-        if (!CheckForWalls(move.x) && (CheckForGround() == 1 || CheckForGround() == 0) )
+        if(_isSliding == false)
         {
-            _playerRB.linearVelocity = new Vector2(
-                velocityX,
-                _playerRB.linearVelocity.y
-
-            );
-            _isWalking = Mathf.Abs(velocityX) > 0.01f;
-        } 
-     else if (CheckForGround() == 2)
-        {
-            if (_isGrounded)
+            //REMOVE THESE COMMENTS BEFORE YOU SUBMIT GIRL
+            if (!CheckForWalls(move.x) && (CheckForGround() == 1 || CheckForGround() == 0))
             {
-                _playerRB.linearVelocity = Vector2.zero;
+                _playerRB.linearVelocity = new Vector2(
+                    velocityX,
+                    _playerRB.linearVelocity.y
+
+                );
+                _isWalking = Mathf.Abs(velocityX) > 0.01f;
             }
-            
-            float _overwriteSlide = move.x * _speed;
+            else if (CheckForGround() == 2)
+            {
+                if (_isGrounded)
+                {
+                    _playerRB.linearVelocity = Vector2.zero;
+                }
 
-            Vector2 _slopeMovement = new Vector2(_overwriteSlide, _playerRB.linearVelocityY);
+                float _overwriteSlide = move.x * _speed;
 
-            _playerRB.Slide(_slopeMovement,Time.deltaTime,_slideRigidbody);
-            _isWalking = true;
+                Vector2 _slopeMovement = new Vector2(_overwriteSlide, _playerRB.linearVelocityY);
+
+                _playerRB.Slide(_slopeMovement, Time.deltaTime, _slideRigidbody);
+                _isWalking = true;
+            }
         }
+
 
         
 
@@ -445,11 +476,20 @@ public class PlayerMovementScript : MonoBehaviour
         _jumpCooldown -= Time.deltaTime;
         _dashAirTimeLeft -= Time.deltaTime;
         _ledgeNudgeTimer -= Time.deltaTime;
-
+        _slideTimeLeft -= Time.deltaTime;
         _jumpMovementGrace -= Time.deltaTime;
         if (_dashAirTimeLeft <= 0f)
         {
             _isDashing = false;
+        }
+        if (_slideTimeLeft <= 0f)
+        {
+            _isSliding = false;
+            if (SlideCoro != null)
+            {
+                StopCoroutine(SlideCoro);
+            }
+  
         }
         if (!_isDashing && !_isSliding)
         {
@@ -567,8 +607,8 @@ public class PlayerMovementScript : MonoBehaviour
             {
                 _isUnableToUncrouch = false;
             }
-
-            CheckForGround();
+   
+   
             if (CheckForGround() == 1)
             {
                 if (!_jumpMovementGraceActive)
