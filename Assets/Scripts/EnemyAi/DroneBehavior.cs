@@ -9,6 +9,7 @@ using UnityEditor;
 public class DroneBehavior : EnemyBehavior
 {
     [SerializeField] private List<Vector2> PatrolPath;
+    [SerializeField] private List<float> PatrolViewAngles;
     [SerializeField] private bool cyclicalPatrol;
     [SerializeField] private float patrolSpeed;
     [SerializeField] private float chaseSpeed;
@@ -52,8 +53,10 @@ public class DroneBehavior : EnemyBehavior
                 Chase();
                 break;
             case PatrolState.Tracking:
+                Tracking();
                 break;
             case PatrolState.Disengage:
+                Disengage();
                 break;
         }
     }
@@ -66,6 +69,7 @@ public class DroneBehavior : EnemyBehavior
         return playerSeen;
     }
 
+    bool forward = true;
     private void Patrol()
     {
         myAgent.speed = patrolSpeed;
@@ -74,8 +78,20 @@ public class DroneBehavior : EnemyBehavior
         if(dist < patrolSpeed * 0.3f)
         {
             //transform.position = PatrolPath[patrolLoopIndex];
-            patrolLoopIndex++;
-            if (patrolLoopIndex >= PatrolPath.Count) patrolLoopIndex = 0;
+            if (!cyclicalPatrol && !forward) patrolLoopIndex--;
+            else patrolLoopIndex++;
+
+            if (patrolLoopIndex < 0)
+            {
+                forward = true;
+                patrolLoopIndex = 0;
+            }
+            if (!cyclicalPatrol && patrolLoopIndex >= PatrolPath.Count)
+            {
+                forward = false;
+                patrolLoopIndex--;
+            }
+            else if (patrolLoopIndex >= PatrolPath.Count) patrolLoopIndex = 0;
 
             myAgent.SetDestination(PatrolPath[patrolLoopIndex]);
         }
@@ -92,17 +108,24 @@ public class DroneBehavior : EnemyBehavior
 
     }
 
+    private bool sightMaintained = false;
+    private float timeMaintained = 0;
     private void Suspicion()
     {
         if (SeePlayer())
         {
-            mySuspicionTotal += Time.deltaTime;
+            if (sightMaintained == false) timeMaintained = 0;
+            sightMaintained = true;
+            mySuspicionTotal += Time.deltaTime + timeMaintained;
             myAgent.SetDestination(lastKnownPlayerLocation);
         }
         else
         {
-            mySuspicionTotal -= Time.deltaTime;
+            if(sightMaintained) timeMaintained = 0;
+            sightMaintained = false;
+            mySuspicionTotal -= (Time.deltaTime + timeMaintained);
         }
+        timeMaintained += Time.deltaTime;
         float suspicionPercent = mySuspicionTotal / suspicionMaximum;
         if (suspicionPercent > 1.0f) suspicionPercent = 1.0f;
         myAgent.speed = patrolSpeed + ((chaseSpeed - patrolSpeed) * suspicionPercent);
@@ -111,7 +134,7 @@ public class DroneBehavior : EnemyBehavior
 
         if (mySuspicionTotal <= 0)
         {
-            curState = PatrolState.Patrol;
+            curState = PatrolState.Disengage;
             mySuspicionTotal = 0;
         }
         else if (mySuspicionTotal >= suspicionMaximum) curState = PatrolState.Chase;
@@ -122,9 +145,34 @@ public class DroneBehavior : EnemyBehavior
     {
         myAgent.SetDestination(lastKnownPlayerLocation);
         eyes.PointView(lastKnownPlayerLocation);
-        SeePlayer();
+        if (!SeePlayer())
+        {
+            curState = PatrolState.Suspicion;
+        }
     }
 
+    private void Tracking()
+    {
+
+    }
+
+    private void Disengage()
+    { 
+        int minIndex = 0;
+        float minDist = Vector2.Distance(transform.position, PatrolPath[0]);
+        for (int i = 1; i < PatrolPath.Count; i++)
+        {
+            float delta = Vector2.Distance(transform.position, PatrolPath[i]);
+            if (delta < minDist)
+            {
+                minIndex = i;
+                minDist = delta;
+            }
+        }
+        patrolLoopIndex = minIndex;
+        curState = PatrolState.Patrol;
+
+    }
 
 
 #if UNITY_EDITOR
@@ -138,6 +186,19 @@ public class DroneBehavior : EnemyBehavior
             if (i < PatrolPath.Count - 1) Gizmos.DrawLine(PatrolPath[i], PatrolPath[i + 1]);
             else if(cyclicalPatrol) Gizmos.DrawLine(PatrolPath[i], PatrolPath[0]);
         }
+
+        if (PatrolViewAngles.Count > 0) 
+        {
+            for (int j = 0; j < PatrolViewAngles.Count; j++) { 
+            List<Ray2D> rayCone = eyes.GenerateVision(PatrolViewAngles[j], PatrolPath[j]);
+                for (int i = 0; i < rayCone.Count; i++)
+                {
+                    Gizmos.color = Color.limeGreen;
+                    Gizmos.DrawLine(rayCone[i].origin, (rayCone[i].direction * eyes.viewDistance) + rayCone[i].origin);
+                }
+            }
+        }
+
     }
 #endif
 

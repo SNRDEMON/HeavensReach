@@ -6,7 +6,7 @@ public class EnemyVision : MonoBehaviour
 {
 
     [SerializeField] private float viewAngle;
-    [SerializeField] private float ViewDistance;
+    [SerializeField] private float ViewDistance; public float viewDistance { get { return ViewDistance; } }
     [SerializeField] private float ViewSpan;
     [SerializeField,Min(3)] private int ViewRayDensity;
     [SerializeField] private bool mirrorX;
@@ -81,6 +81,32 @@ public class EnemyVision : MonoBehaviour
 
 
         return rayCone;
+    }
+
+    public List<Ray2D> GenerateVision(float angle, Vector2 position)
+    {
+        float densityInverse = 1.0f / (float)ViewRayDensity;
+
+        float lowRange = angle - (ViewSpan * 0.5f);
+        float highRange = angle + (ViewSpan * 0.5f);
+
+        List<Ray2D> rayCone = new List<Ray2D>();
+        for (int i = 0; i < ViewRayDensity; i++)
+        {
+            float curAngle = Mathf.Lerp(lowRange, highRange, (float)i * densityInverse);
+            Vector2 neWangle = new Vector2(Mathf.Cos(curAngle), Mathf.Sin(curAngle));
+            if (mirrorX) neWangle.x *= -1.0f;
+            Ray2D ray = new Ray2D(position, neWangle.normalized);
+            rayCone.Add(ray);
+        }
+
+
+        return rayCone;
+    }
+
+    public string PrintAngle()
+    {
+        return $"{viewAngle * radToDeg}°";
     }
 
 #if UNITY_EDITOR
