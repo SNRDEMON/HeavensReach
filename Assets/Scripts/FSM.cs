@@ -10,6 +10,7 @@ public class FSM : MonoBehaviour
     private Animator _anim;
     private Animator _wingAnim;
     [SerializeField] private PlayerMovementScript _playerMovementScript;
+    [SerializeField] private PlayerAttack _playerAttack;
 
     private void Start()
     {
@@ -45,22 +46,47 @@ public class FSM : MonoBehaviour
     {
         if (_playerMovementScript._isWalking && !_playerMovementScript._isCrouched)
         {
-            _anim.Play("Walk");
+            if(_playerAttack._isAttacking)
+            { 
+              
+
+                _anim.Play("WalkNoArm");
+            }
+            else
+                _anim.Play("Walk");
         }
         else if (!_playerMovementScript._isWalking && !_playerMovementScript._isCrouched)
         {
-            _anim.Play("Idle");
+            if (_playerAttack._isAttacking)
+            {
+
+                _anim.Play("IdleNoArm");
+            }
+            else
+                _anim.Play("Idle");
         }
 
         else if (_playerMovementScript._isCrouched && _playerMovementScript._isWalking)
         {
-            _anim.Play("Crouch");
+            if (_playerAttack._isAttacking)
+            {
+               
+                _anim.Play("CrouchNoArm");
+            }
+            else
+                _anim.Play("Crouch");
         }
         else if (_playerMovementScript._isCrouched && !_playerMovementScript._isWalking)
         {
-            _anim.Play("CrouchIdle");
-        }
+            if (_playerAttack._isAttacking)
+            {
 
+                _anim.Play("CrouchIdleNoArm");
+            }
+            else
+                _anim.Play("CrouchIdle");
+        }
+     
     }
     public void OnCrouchPlay(InputAction.CallbackContext context)
     {

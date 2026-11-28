@@ -15,8 +15,14 @@ public class PlayerAttack : MonoBehaviour
     private GameObject _currentUsedAttack;
     private Coroutine _attackCoroutine;
     private float _attackDuration = 0.5f;
-    private bool _isAttacking  = false;
+    public bool _isAttacking  = false;
     private int _defaultDirection;
+
+    [SerializeField] private GameObject _Arm;
+    [SerializeField] private SpriteRenderer _armSprite;
+    //_Arm.transform.localPosition = new Vector3(-0.075, 0, 0); right
+    //_Arm.transform.localPosition = new Vector3(0.1, 0, 0); left
+
     public void OnAimLeftRight(InputAction.CallbackContext context)
     {
 
@@ -46,11 +52,17 @@ public class PlayerAttack : MonoBehaviour
         {
             if (_vertMove.y == 1f)
             {
+                _Arm.SetActive(true); // + 65 Z rotation for up
+                _Arm.transform.rotation = Quaternion.Euler(0f, 0f, 65f);
+                
+
                 _currentUsedAttack = _upAttackHitBox;
                 _attackCoroutine = StartCoroutine(AttackCoro(_attackDuration));
             }
             else if (_vertMove.y == -1f)
             {
+                _Arm.SetActive(true); // + -70 Z rotation for up
+                _Arm.transform.rotation = Quaternion.Euler(0f, 0f, -75f);
                 _currentUsedAttack = _downAttackHitBox;
                 _attackCoroutine = StartCoroutine(AttackCoro(_attackDuration));
             }
@@ -58,11 +70,15 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (_moveHoriz.x == 1f)
                 {
+                    _Arm.SetActive(true); // + 0 to -42  Z rotation for up
+                    _Arm.transform.rotation = Quaternion.Euler(0f, 0f, -17f);
                     _currentUsedAttack = _rightAttackHitBox;
                     _attackCoroutine = StartCoroutine(AttackCoro(_attackDuration));
                 }
                 else if (_moveHoriz.x == -1f)
                 {
+                    _Arm.SetActive(true); // + 0 to -42  Z rotation for up
+                    _Arm.transform.rotation = Quaternion.Euler(0f, 0f, -17f);
                     _currentUsedAttack = _leftAttackHitBox;
                     _attackCoroutine = StartCoroutine(AttackCoro(_attackDuration));
                 }
@@ -70,11 +86,15 @@ public class PlayerAttack : MonoBehaviour
                 {
                     if (_defaultDirection == -1)
                     {
+                        _Arm.SetActive(true); // + 0 to -42  Z rotation for up
+                        _Arm.transform.rotation = Quaternion.Euler(0f, 0f, -17f);
                         _currentUsedAttack = _rightAttackHitBox;
                         _attackCoroutine = StartCoroutine(AttackCoro(_attackDuration));
                     }
                     else if (_defaultDirection == 1)
                     {
+                        _Arm.SetActive(true); // + 0 to -42  Z rotation for up
+                        _Arm.transform.rotation = Quaternion.Euler(0f, 0f, -17f);
                         _currentUsedAttack = _leftAttackHitBox;
                         _attackCoroutine = StartCoroutine(AttackCoro(_attackDuration));
                     }
@@ -98,5 +118,7 @@ public class PlayerAttack : MonoBehaviour
         }
         _isAttacking = false;
         _currentUsedAttack.SetActive(false);
+        _Arm.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        _Arm.SetActive(false);
     }
 }
